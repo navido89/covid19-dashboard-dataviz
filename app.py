@@ -1,10 +1,13 @@
 # We import the libraries
 import streamlit as st
 import plotly.express as px # This is for bubble maps
+import plotly.graph_objects as go # This is for bar plots 
 import pandas as pd 
 
-# Plot Number 2 - Bubble Map with animation total cases.
+# WHO Global Data
 who_global_data = "https://covid19.who.int/WHO-COVID-19-global-data.csv"
+
+# Plot Number 2 - Bubble Map with animation total cases.
 @st.cache
 def plot2():
     # We grab the data
@@ -55,6 +58,97 @@ def plot3():
                         projection="natural earth")
     fig1.update_layout(title_text = "Covid19 Deaths Globally Per Month - Time Series Bubble Map Animation" ,showlegend=False)
     return fig1
+
+
+@st.cache
+# Plot Number 4 - Time Series Bar Plot 1
+def plot4():
+    # We import the data
+    df_WHO = pd.read_csv(who_global_data)
+
+    # We group by the data
+    df_WHO = df_WHO.groupby(['Date_reported'])[['New_cases', 'New_deaths','Cumulative_cases','Cumulative_deaths']].sum()
+
+    # We reset the index
+    df_WHO = df_WHO.reset_index()
+
+    df = df_WHO
+
+    # Create lists to iterate over
+    lst = ['New_cases','Cumulative_cases']
+
+    # plotly figure setup
+    fig2 = go.Figure()
+
+    # one trace for each df column
+    fig2.add_trace(go.Bar(name="Global Cases Situation",x=df["Date_reported"].values, y=df["New_cases"].values))
+
+    # one button for each df column
+    updatemenu= []
+    buttons=[]
+
+    for i in lst:
+        buttons.append(dict(method='restyle',label = str(i),args=[{'x':[df["Date_reported"].values],'y':[df[i].values]},[0]])
+                    )
+    
+    # some adjustments to the updatemenus
+    button_layer_1_height = 1.25
+    updatemenu = list([dict(
+        buttons = buttons,
+        direction="down",
+        pad={"r":10,"t":10},
+        showactive=True,
+        x= 0.37,
+        xanchor="left",
+        y=button_layer_1_height,
+        yanchor="top",  font = dict(color = "green"))])
+
+    fig2.update_traces(marker_color='green')
+    fig2.update_layout(showlegend=True, updatemenus=updatemenu, title_text = "Global Cases")
+    fig2.update_xaxes(categoryorder= 'array', categoryarray= df.index)
+    return fig2 
+
+@st.cache
+# Plot Number 5 - Time Series Bar Plot 2
+def plot5():
+    # We import the data
+    df_WHO = pd.read_csv(who_global_data)
+
+    # We group by the data
+    df_WHO = df_WHO.groupby(['Date_reported'])[['New_cases', 'New_deaths','Cumulative_cases','Cumulative_deaths']].sum()
+
+    # We reset the index
+    df_WHO = df_WHO.reset_index()
+
+    df = df_WHO
+
+    # We set up the second plot
+    lst2 = ['New_deaths', 'Cumulative_deaths']
+    fig3 = go.Figure()
+    fig3.add_trace(go.Bar(name="Global Deaths Situation",x=df["Date_reported"].values, y=df["New_deaths"].values))
+
+    updatemenu2= []
+    buttons2=[]
+
+    for i in lst2:
+        buttons2.append(dict(method='restyle',label = str(i),args=[{'x':[df["Date_reported"].values],'y':[df[i].values]},[0]])
+                    )
+
+    button_layer_1_height = 1.25
+    updatemenu2 = list([dict(
+        buttons = buttons2,
+        direction="down",
+        pad={"r":10,"t":10},
+        showactive=True,
+        x= 0.37,
+        xanchor="left",
+        y=button_layer_1_height,
+        yanchor="top",  font = dict(color = "red"))])
+
+    fig3.update_traces(marker_color='red')
+    fig3.update_layout(showlegend=True, updatemenus=updatemenu2, title_text = "Global Deaths")
+    fig3.update_xaxes(categoryorder= 'array', categoryarray= df.index)
+    return fig3
 
 # We create our Streamlit App
 def main():
@@ -133,10 +227,10 @@ def main():
             st.plotly_chart(bubble_plot2)
             
             # Adding Time Series Bar Plot.
-            # tsa_plot1 = plot4()
-            # st.plotly_chart(tsa_plot1)
-            # tsa_plot2 = plot5()
-            # st.plotly_chart(tsa_plot2)
+            tsa_plot1 = plot4()
+            st.plotly_chart(tsa_plot1)
+            tsa_plot2 = plot5()
+            st.plotly_chart(tsa_plot2)
 
     
    
