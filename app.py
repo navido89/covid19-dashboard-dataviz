@@ -765,7 +765,7 @@ def plot8():
 
     country_lists_global_map = ["total_cases","total_deaths","total_cases_per_100k","total_deaths_per_100k",'total_distributed','people_fully_vaccinated','people_vaccinated_per_hundred']
 
-    sample_map = folium.Map(location=[48, -102], zoom_start=4)
+    sample_map = folium.Map(location=[48, -102], zoom_start=3)
 
     # Set up Choropleth map
     for color, cmap, i in zip(colors, cmaps, country_lists_global_map):
@@ -984,39 +984,35 @@ def get_global_deaths():
 def main():
     st.set_page_config(layout="wide")
     
-    st.title("Covid19 - Dashboard")
+    st.title("COVID-19 - Dashboard")
     
     # First Row
     row0_spacer1, row0_1, row0_spacer2, row0_2, row0_spacer3 = st.beta_columns((.1, 2, .2, 1, .1))
-    st.markdown('A Web App by [Navid Mashinchi](http://www.navidma.com)')
 
     # Create the sidebar
-    st.sidebar.title("Covid19 - Dashboard")
-    st.sidebar.markdown("Hey there! Welcome to my Covid19 data visualization web app. The purpose of this project is to have a look at the current state of Covid19 using visualizations from different geographical perspectives. The project is broken down into three parts.")
-    st.sidebar.markdown("**1.** Global Covid19 Situation")
-    st.sidebar.markdown("**2.** Covid19 Situation by World Health Organization Region (WHO)")
-    st.sidebar.markdown("**3.** Covid19 Situation in the United States")
-
-    st.sidebar.title("Navigator")
+    st.sidebar.title("COVID-19 - Dashboard")
+    st.sidebar.markdown('A Web App by [Navid Mashinchi](http://www.navidma.com)') 
+    st.sidebar.markdown("[![Star](https://img.shields.io/github/stars/navido89.svg?logo=github&style=social)](https://github.com/navido89)&nbsp[![Follow](https://img.shields.io/twitter/follow/NMashinchi?style=social)](https://twitter.com/NMashinchi)") 
+    st.sidebar.title("Navigation")
    
-    options = st.sidebar.selectbox("Please Select A Page",['Home','Global Situation', 'Situation by WHO Region', 'Situation in the United States'], key='1')
+    options = st.sidebar.radio("Go to",['Home','Global Situation', 'Situation by WHO Region', 'Situation in the United States'], key='1')
     
     # Main Page
     if options == "Home":
         row1_spacer1, row1_1, row1_spacer2 = st.beta_columns((.1, 3.2, .1))
 
         with row1_1:
-            st.markdown("![Covid 19 Picture](http://www.pharmatimes.com/__data/assets/image/0010/1347742/p42_image.jpg)")
-            st.markdown("Hey there! Welcome to my Covid19 data visualization web app. The purpose of this project is to have a look at the current state of Covid19 using visualizations from different geographical perspectives. The project is broken down into three parts.")
-            st.markdown("**1.** Global Covid19 Situation")
-            st.markdown("**2.** Covid19 Situation by World Health Organization Region (WHO)")
-            st.markdown("**3.** Covid19 Situation in the United States")
+            st.markdown("![COVID-19 Picture](https://d2jx2rerrg6sh3.cloudfront.net/image-handler/ts/20200420091641/ri/674/picture/2020/4/%40shutterstock_1647268288.jpg)")
+            st.markdown("Hey there! Welcome to my COVID-19 data visualization web app. The purpose of this project is to have a look at the current state of COVID-19 using visualizations from different geographical perspectives. The plots have been created by using data visualization tools such as Plotly and Folium. The project is broken down into three parts.")
+            st.markdown("**1.** Global COVID-19 Situation")
+            st.markdown("**2.** COVID-19 Situation by World Health Organization Region (WHO)")
+            st.markdown("**3.** COVID-19 Situation in the United States")
             
             #We will list the data source.
             st.subheader('Data Source:')
             
             # Covid data source.
-            st.markdown('**Covid19 - Data:**')
+            st.markdown('**COVID-19 - Data:**')
             st.markdown('* [Global Cases](https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv) by Johns Hopkins CCSE.')
             st.markdown('* [Global Deaths](https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv) by Johns Hopkins CCSE.')
             st.markdown('* [US Cases](https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv) by Johns Hopkins CCSE.')
@@ -1045,10 +1041,9 @@ def main():
             st.subheader('1. Global Situation:')
             global_cases = round(get_global_cases())
             global_deaths = round(get_global_deaths())
-            st.markdown("As of **{}**, there have been **{}** positive Covid19 cases and **{}** deaths globally. Below is a Folium Choropleth that shows the total cases, total deaths, total cases per capita (100,000), and total deaths per capita (100,000). **Please click on the layer control to select the different maps**. In addition to that, you can hover over each country to see more information.".format(current_date,global_cases,global_deaths))
+            st.markdown("As of **{}**, there have been **{}** positive COVID-19 cases and **{}** deaths globally. Below is a Folium Choropleth that shows the total cases, total deaths, total cases per capita (100,000), and total deaths per capita (100,000). **Please click on the layer control to select the different maps**. In addition to that, you can hover over each country to see more information.".format(current_date,global_cases,global_deaths))
             folium_plot1 = plot1()
             folium_static(folium_plot1)
-            
             
             # Adding time series bubble maps with animation.
             bubble_plot1 = plot2()
@@ -1080,15 +1075,15 @@ def main():
     if options == "Situation in the United States":
         row4_spacer1, row4_1, row4_spacer2 = st.beta_columns((.1, 3.2, .1))  
         with row4_1:
-            st.subheader('3. Situation in the United State:')
-            st.markdown("The focus lies in the United States and its current state regarding Covid and its Vaccine situation by state in the map below.  To better understand the vaccine features, please read below.")
+            st.subheader('3. Situation in the United States:')
+            st.markdown("![USA Covid Picture](https://989bull.com/wp-content/uploads/2020/06/expert-warns-us-could-see-up-to-400000-covid-19-deaths-by-spring-2021.jpg)")
+            st.markdown("Here the focus is on the United States and its current state regarding COVID-19 and its Vaccine situation by the state. To better understand the vaccine features, please read below.")
             st.markdown("* **people_fully_vaccinated**: total number of people who received all doses prescribed by the vaccination protocol. If a person receives the first dose of a 2-dose vaccine, this metric stays the same. If they receive the second dose, the metric goes up by 1.")
             st.markdown("* **people_fully_vaccinated_per_hundred**: people_fully_vaccinated per 100 people in the total population of the state. ")
             st.markdown("* **total_distributed**: cumulative counts of COVID-19 vaccine doses recorded as shipped in CDC's Vaccine Tracking System. ")
+            st.markdown('**Please click on the layer control to select the different maps**. In addition to that, you can hover over each state to see more information.')
             folium_plot8 = plot8()
             folium_static(folium_plot8)
-
-    
    
 if __name__ == '__main__':
     main()
