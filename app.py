@@ -1,10 +1,44 @@
 # We import the libraries
 import streamlit as st
 import plotly.express as px # This is for bubble maps and bar plots
-import pandas as pd 
+import pandas as pd
+
+import folium
+from streamlit_folium import folium_static
+
+import geopandas as gpd
+import numpy as np
+import branca
 
 # WHO Global Data
 who_global_data = "https://covid19.who.int/WHO-COVID-19-global-data.csv"
+
+# Create this for the folium map.
+class BindColormap(MacroElement):
+    """Binds a colormap to a given layer.
+
+    Parameters
+    ----------
+    colormap : branca.colormap.ColorMap
+        The colormap to bind.
+    """
+    def __init__(self, layer, colormap):
+        super(BindColormap, self).__init__()
+        self.layer = layer
+        self.colormap = colormap
+        self._template = Template(u"""
+        {% macro script(this, kwargs) %}
+            {{this.colormap.get_name()}}.svg[0][0].style.display = 'block';
+            {{this._parent.get_name()}}.on('overlayadd', function (eventLayer) {
+                if (eventLayer.layer == {{this.layer.get_name()}}) {
+                    {{this.colormap.get_name()}}.svg[0][0].style.display = 'block';
+                }});
+            {{this._parent.get_name()}}.on('overlayremove', function (eventLayer) {
+                if (eventLayer.layer == {{this.layer.get_name()}}) {
+                    {{this.colormap.get_name()}}.svg[0][0].style.display = 'none';
+                }});
+        {% endmacro %}
+        """) 
 
 # Plot Number 2 - Bubble Map with animation total cases.
 @st.cache
@@ -379,6 +413,201 @@ def plot7():
     return fig2
 
 
+# Plot Number 8 - Folium Map US Situation
+def plot8():
+    # Grab US Cases
+    us_data_cases = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv")
+    us_data_cases = us_data_cases.groupby("Province_State").sum()
+    us_data_cases = us_data_cases.iloc[:,-1:]
+    us_data_cases.columns = ["total_cases"]
+    
+    # Grab US deaths 
+    us_data_deaths = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv")
+    us_data_deaths = us_data_deaths.groupby("Province_State").sum()
+    us_data_deaths = us_data_deaths.iloc[:,-1:]
+    us_data_deaths.columns = ["total_deaths"]
+   
+    US_df = pd.concat([us_data_cases, us_data_deaths], axis=1).reset_index()
+
+    # Need to get vaccine data by state
+    us_vaccine_data = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/us_state_vaccinations.csv")
+
+    # We grab the latest date
+    d1 = us_vaccine_data["date"].iloc[-1]
+
+    us_vaccine_data_state = us_vaccine_data.loc[us_vaccine_data["date"] == d1]
+
+    us_vaccine_data_state = us_vaccine_data_state[["location","total_distributed","people_fully_vaccinated","people_vaccinated_per_hundred"]]
+    us_vaccine_data_state = us_vaccine_data_state.reset_index()
+
+    # We change the column name of location
+    us_vaccine_data_state.rename(columns={'location':'Province_State'}, inplace=True)
+
+    # Need to change New York State to New York
+    us_vaccine_data_state["Province_State"].replace({'New York State':'New York'}, inplace = True)
+
+    # We add it the vaccine info to our US_df
+    US_df = US_df.merge(us_vaccine_data_state,on = "Province_State")
+    
+    # We grab the geoJSON
+    url = (
+        "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data"
+    )
+    state_geo = f"{url}/us-states.json"
+
+    # We read the file and print it.
+    geoJSON_df = gpd.read_file(state_geo)
+    geoJSON_df.rename(columns={'name':'Province_State'}, inplace=True)
+
+    # Let's check which states are missing.
+    states_list = list(US_df.Province_State.unique())
+
+    # Need to remove American Samoa, Guam, Northern Mariana Islands, Puerto Rico, Virgin Islands,District of Columbia
+    US_df.drop(index=US_df[US_df['Province_State'] == 'American Samoa'].index, inplace=True)
+    US_df.drop(index=US_df[US_df['Province_State'] == 'Guam'].index, inplace=True)
+    US_df.drop(index=US_df[US_df['Province_State'] == 'Northern Mariana Islands'].index, inplace=True)
+    US_df.drop(index=US_df[US_df['Province_State'] == 'Puerto Rico'].index, inplace=True)
+    US_df.drop(index=US_df[US_df['Province_State'] == 'Virgin Islands'].index, inplace=True)
+    US_df.drop(index=US_df[US_df['Province_State'] == 'District of Columbia'].index, inplace=True)
+
+    states_list = list(US_df.Province_State.unique())
+    #print(len(states_list))
+
+    geoJSON_states = list(geoJSON_df.Province_State.values)
+    #print(len(geoJSON_states))
+
+    # Check if any states are missing.
+    missing_states = np.setdiff1d(geoJSON_states,states_list)
+   
+    # We merge the data frames now.
+    final_us_df = geoJSON_df.merge(US_df, on = "Province_State")
+
+    # We need to grab the population for each state.
+    US_pop_df = pd.read_html("https://www.infoplease.com/us/states/state-population-by-rank")
+    US_pop_df = US_pop_df[0]
+    US_pop_df.rename(columns={'State':'Province_State'}, inplace=True)
+    US_pop_df = US_pop_df[["Province_State","July 2019 Estimate"]]
+   
+    # We add the population now to the final_us_df.
+    # We merge the data frames now.
+    final_us_df = final_us_df.merge(US_pop_df, on = "Province_State")
+    final_us_df.rename(columns={'July 2019 Estimate':'Population'}, inplace=True)
+
+    # We now calculate the the Total Cases and Total Deaths by 100k
+    final_us_df['total_cases_per_100k'] = final_us_df.apply(lambda x: (round(x.total_cases/x.Population * 100000)), axis = 1)
+    final_us_df['total_deaths_per_100k'] = final_us_df.apply(lambda x: (round(x.total_deaths/x.Population * 100000)), axis = 1)
+    
+    # Let's rearrange the columns 
+    final_us_df = final_us_df[["id","Province_State","geometry","total_cases","total_deaths","total_cases_per_100k","total_deaths_per_100k","total_distributed","people_fully_vaccinated","people_vaccinated_per_hundred","Population"]]
+    
+    colors = ['YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'PuBuGn','YlGn']
+
+    # create a custom legend using branca
+    cmap1 = branca.colormap.StepColormap(
+        colors=["#ffffd4","#fee391","#fec44f","#fe9929","#d95f0e"],
+        vmin=0,
+        vmax=final_us_df['total_cases'].max(),  # setting max value for legend
+        caption='Total Cases')
+
+    cmap2 = branca.colormap.StepColormap(
+        colors=branca.colormap.step.YlOrRd_09.colors,
+        vmin=0,
+        vmax=final_us_df['total_deaths'].max(),  # setting max value for legend
+        caption='Total Deaths')
+        
+    cmap3 = branca.colormap.StepColormap(
+        colors=branca.colormap.step.OrRd_09.colors,
+        vmin=0,
+        vmax=final_us_df['total_cases_per_100k'].max(),  # setting max value for legend
+        caption='Total Cases Per 100k')
+        
+    cmap4 = branca.colormap.StepColormap(
+        colors=branca.colormap.step.PuRd_09.colors,
+        vmin=0,
+        vmax=final_us_df['total_deaths_per_100k'].max(),  # setting max value for legend
+        caption='Total Deaths Per 100k')
+
+    cmap5 = branca.colormap.StepColormap(
+        colors=['#fff7f3','#fde0dd','#fcc5c0','#fa9fb5',"#f768a1"],
+        vmin=0,
+        vmax=final_us_df['total_distributed'].max(),  # setting max value for legend
+        caption='Total Distributed')
+
+    cmap6 = branca.colormap.StepColormap(
+        colors=["#fff7fb","#ece2f0","#d0d1e6","#a6bddb","#02818a"],
+        vmin=0,
+        vmax=final_us_df['people_fully_vaccinated'].max(),  # setting max value for legend
+        caption='People Fully Vaccinated')
+
+    cmap7 = branca.colormap.StepColormap(
+        colors=branca.colormap.step.YlGn_09.colors,
+        vmin=0,
+        vmax=final_us_df['people_vaccinated_per_hundred'].max(),  # setting max value for legend
+        caption='People Vaccinated Per 100')
+
+    cmaps = [cmap1,cmap2,cmap3,cmap4,cmap5,cmap6,cmap7]
+
+    country_lists_global_map = ["total_cases","total_deaths","total_cases_per_100k","total_deaths_per_100k",'total_distributed','people_fully_vaccinated','people_vaccinated_per_hundred']
+
+    sample_map = folium.Map(location=[48, -102], zoom_start=4)
+
+    # Set up Choropleth map
+    for color, cmap, i in zip(colors, cmaps, country_lists_global_map):
+        
+        choropleth = folium.Choropleth(
+        geo_data=final_us_df,
+        data=final_us_df,
+        name=i,
+        columns=['Province_State',i],
+        key_on="feature.properties.Province_State",
+        fill_color=color,
+        colormap= cmap,
+        fill_opacity=1,
+        line_opacity=0.2,
+        show=False
+        )
+        
+        # this deletes the legend for each choropleth you add
+        for child in choropleth._children:
+            if child.startswith("color_map"):
+                del choropleth._children[child]
+
+        style_function1 = lambda x: {'fillColor': '#ffffff', 
+                            'color':'#000000', 
+                            'fillOpacity': 0.1, 
+                            'weight': 0.1}
+        highlight_function1 = lambda x: {'fillColor': '#000000', 
+                                'color':'#000000', 
+                                'fillOpacity': 0.50, 
+                                'weight': 0.1}
+        NIL1 = folium.features.GeoJson(
+            data = final_us_df,
+            style_function=style_function1, 
+            control=False,
+            highlight_function=highlight_function1, 
+            tooltip=folium.features.GeoJsonTooltip(
+                fields=["Province_State","total_cases","total_deaths","total_cases_per_100k","total_deaths_per_100k",'total_distributed','people_fully_vaccinated','people_vaccinated_per_hundred'],
+                aliases=["Province_State","total_cases","total_deaths","total_cases_per_100k","total_deaths_per_100k",'total_distributed','people_fully_vaccinated','people_vaccinated_per_hundred'],
+                style=("background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;") 
+            )
+        )
+        sample_map.add_child(NIL1)
+        sample_map.keep_in_front(NIL1)
+        sample_map.add_child(cmap)
+        sample_map.add_child(choropleth)
+        
+        # bind choropleth and cmap
+        bc = BindColormap(choropleth, cmap)
+        sample_map.add_child(bc)
+
+        # Add dark and light mode. 
+        folium.TileLayer('cartodbdark_matter',name="dark mode",control=True).add_to(sample_map)
+        folium.TileLayer('cartodbpositron',name="light mode",control=True).add_to(sample_map)
+
+    sample_map.add_child(folium.LayerControl())
+    return sample_map
+
+
 # We create our Streamlit App
 def main():
     st.set_page_config(layout="wide")
@@ -474,6 +703,18 @@ def main():
             st.plotly_chart(who_plot1)
             who_plot2 = plot7()
             st.plotly_chart(who_plot2)
+    
+    # US Situation Page
+    if options == "Situation in the United States":
+        row4_spacer1, row4_1, row4_spacer2 = st.beta_columns((.1, 3.2, .1))  
+        with row4_1:
+            st.subheader('3. Situation in the United State:')
+            st.markdown("The focus lies in the United States and its current state regarding Covid and its Vaccine situation by state in the map below.  To better understand the vaccine features, please read below.")
+            st.markdown("* **people_fully_vaccinated**: total number of people who received all doses prescribed by the vaccination protocol. If a person receives the first dose of a 2-dose vaccine, this metric stays the same. If they receive the second dose, the metric goes up by 1.")
+            st.markdown("* **people_fully_vaccinated_per_hundred**: people_fully_vaccinated per 100 people in the total population of the state. ")
+            st.markdown("* **total_distributed**: cumulative counts of COVID-19 vaccine doses recorded as shipped in CDC's Vaccine Tracking System. ")
+            folium_plot8 = plot8()
+            folium_static(folium_plot8)
 
     
    

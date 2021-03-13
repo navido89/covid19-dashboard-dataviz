@@ -1,3 +1,7 @@
 streamlit
 pandas
-plotly.express 
+plotly.express
+geopandas
+numpy
+branca 
+folium_static
