@@ -2,15 +2,14 @@
 import streamlit as st
 import plotly.express as px # This is for bubble maps and bar plots
 import pandas as pd
-
 import folium
 from streamlit_folium import folium_static
-
 import geopandas as gpd
 import numpy as np
 import branca
 from branca.element import MacroElement
 from jinja2 import Template
+from datetime import date
 
 # WHO Global Data
 who_global_data = "https://covid19.who.int/WHO-COVID-19-global-data.csv"
@@ -40,7 +39,222 @@ class BindColormap(MacroElement):
                     {{this.colormap.get_name()}}.svg[0][0].style.display = 'none';
                 }});
         {% endmacro %}
-        """) 
+        """)
+
+# Plot Number 1 - Folium Plot
+def plot1():
+    # We import the geoJSON file. 
+    url = 'https://raw.githubusercontent.com/python-visualization/folium/master/examples/data'
+    country_shapes = f'{url}/world-countries.json'
+
+    # We read the file and print it.
+    geoJSON_df = gpd.read_file(country_shapes)
+
+    # We import the Data for global cases
+    df_global_total = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
+    df_global_total.head()
+
+    # We change the Country/Region column to name
+    df_global_total.rename(columns={'Country/Region':'name'}, inplace=True)
+
+    # We drop the columns Province/State, Lat and Long
+    df_global_total = df_global_total.drop(df_global_total.columns[[0, 2, 3]], axis=1)
+    df_global_total = df_global_total.groupby(by=["name"]).sum()
+    df_global_total = df_global_total
+
+    # Let's check how many entries we have in both data frames
+    # List of countries in df_global_total
+    country_lst_df_global_total = list(df_global_total.index)
+
+    # list of countries in geoJson file
+    country_lst_geoJSON = list(geoJSON_df.name.values)
+
+    # We need to clean the data. As you can see above country names such as US that should be South Korea instead.
+    geoJSON_df["name"].replace({'United States of America':'US'}, inplace = True)
+    geoJSON_df["name"].replace({'South Korea':'Korea, South'}, inplace = True)
+    geoJSON_df["name"].replace({'The Bahamas':'Bahamas'}, inplace = True)
+    geoJSON_df["name"].replace({'Ivory Coast':'Cote d\'Ivoire'}, inplace = True)
+    geoJSON_df["name"].replace({'Republic of the Congo':'Congo (Brazzaville)'}, inplace = True)
+    geoJSON_df["name"].replace({'Democratic Republic of the Congo':'Congo (Kinshasa)'}, inplace = True)
+    geoJSON_df["name"].replace({'United Republic of Tanzania':'Tanzania'}, inplace = True)
+    geoJSON_df["name"].replace({'Czech Republic':'Czechia'}, inplace = True)
+    geoJSON_df["name"].replace({'Republic of Serbia':'Serbia'}, inplace = True)
+
+    # Next we merge our df_global_total and the geoJSON data frame on the key name.
+    final_total_cases = geoJSON_df.merge(df_global_total,how="left",on = "name")
+    final_total_cases = final_total_cases.fillna(0)
+
+    # We import the Data for global deaths
+    df_global_death = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
+
+    # We change the Country/Region column to name
+    df_global_death.rename(columns={'Country/Region':'name'}, inplace=True)
+
+    # We drop the columns Province/State, Lat and Long
+    df_global_death = df_global_death.drop(df_global_death.columns[[0, 2, 3]], axis=1)
+    df_global_death = df_global_death.groupby(by=["name"]).sum()
+    df_global_death = df_global_death
+    df_global_death = df_global_death.fillna(0)
+
+    # Next we create our dataframe for the folium map. 
+    # We want the country names, the geometry and total number of cases and total number of deaths. 
+    df_global_folium = final_total_cases
+    df_global_folium = df_global_folium.iloc[:,[1,2,-1]]
+
+    # We change the column name for the date to total cases 
+    df_global_folium.rename(columns={ df_global_folium.columns[-1]: "covid_total" }, inplace = True)
+
+    # We need to add the total deaths to df_global_folium
+    # We reset the index
+    df_global_death.reset_index(level=0,inplace=True)
+
+    # We grab only the name column and the last column
+    df_global_death_name_last_column = df_global_death.iloc[:,[0,-1]]
+
+    # We change the column name for the date to total cases 
+    df_global_death_name_last_column.rename(columns={ df_global_death_name_last_column.columns[-1]: "covid_deaths" }, inplace = True)
+
+    # Next we merge the total deaths to the df_global_folium
+    df_global_folium = df_global_folium.merge(df_global_death_name_last_column,how="left", on = "name")
+
+    # Next we need to grab the population for each country so we can calculate the rates per 100k population.
+    pop_df = pd.read_csv("population_by_country_2020.csv")
+
+    # We grab only the first two columns
+    pop_df = pop_df[["Country (or dependency)","Population (2020)"]]
+
+    # We will change the column name of country to name
+    pop_df.rename(columns={'Country (or dependency)':'name'}, inplace=True)
+
+    # We need to clean the data. As you can see above country names such as US that should be South Korea instead.
+    pop_df["name"].replace({'United States':'US'}, inplace = True)
+    pop_df["name"].replace({'South Korea':'Korea, South'}, inplace = True)
+    pop_df["name"].replace({'DR Congo':'Congo (Brazzaville)'}, inplace = True)
+    pop_df["name"].replace({'Congo':'Congo (Kinshasa)'}, inplace = True)
+    pop_df["name"].replace({'Czech Republic (Czechia)':'Czechia'}, inplace = True)
+    pop_df["name"].replace({'Côte d\'Ivoire':'Cote d\'Ivoire'}, inplace = True)
+
+    # Now we can merge the pop_df with df_global_folium
+    df_global_folium = df_global_folium.merge(pop_df,on = "name")
+    df_global_folium = df_global_folium .fillna(0)
+
+    # We change the column name of Population (2020) to Population
+    df_global_folium.rename(columns={'Population (2020)':'Population'}, inplace=True)
+
+    # Change the order of the columns
+    df_global_folium = df_global_folium[['name', 'Population', 'geometry', 'covid_total', 'covid_deaths']]
+
+    # We now calculate the the Total Cases and Total Deaths by 100k
+    df_global_folium['covid_cases_per_100k'] = df_global_folium.apply(lambda x: (x.covid_total/x.Population * 100000), axis = 1)
+    df_global_folium['covid_deaths_per_100k'] = df_global_folium.apply(lambda x: (x.covid_deaths/x.Population * 100000), axis = 1)
+
+    # Let's round the values as well 
+    df_global_folium[["covid_cases_per_100k","covid_deaths_per_100k"]] = df_global_folium[["covid_cases_per_100k","covid_deaths_per_100k"]].round(0)
+
+    # Let's turn them into integers
+    df_global_folium[["covid_total","covid_deaths","covid_cases_per_100k","covid_deaths_per_100k"]] = df_global_folium[["covid_total","covid_deaths","covid_cases_per_100k","covid_deaths_per_100k"]].applymap(np.int64)
+
+    df_global_folium.to_csv("data")
+
+    lats = 1 * np.linspace(-100, -100, 167)
+    lons = 1 * np.linspace(-100, -100, 167)
+    colors = np.sin(1 * np.linspace(0, 0, 167))
+
+    # We create the colors for the custom legends
+    colors = ["YlGn","OrRd","BuPu","GnBu"]
+
+    # create a custom legend using branca
+    cmap1 = branca.colormap.StepColormap(
+        colors=['#ffffcc','#d9f0a3','#addd8e','#78c679','#238443'],
+        vmin=0,
+        vmax=df_global_folium['covid_total'].max(),  
+        caption='Covid Total')
+
+    cmap2 = branca.colormap.StepColormap(
+        colors=["#fef0d9",'#fdcc8a','#fc8d59','#d7301f'],
+        vmin=0,
+        vmax=df_global_folium['covid_deaths'].max(),  
+        caption='Covid Deaths')
+        
+    cmap3 = branca.colormap.StepColormap(
+        colors=branca.colormap.step.BuPu_09.colors,
+        vmin=0,
+        vmax=df_global_folium['covid_cases_per_100k'].max(),  
+        caption='covid_cases_per_100k')
+        
+    cmap4 = branca.colormap.StepColormap(
+        colors=branca.colormap.step.GnBu_09.colors,
+        vmin=0,
+        vmax=df_global_folium['covid_deaths_per_100k'].max(),  
+        caption='covid_deaths_per_100k')
+
+    cmaps = [cmap1, cmap2,cmap3,cmap4]
+    country_lists_global_map = ["covid_total","covid_deaths","covid_cases_per_100k","covid_deaths_per_100k"]
+
+    sample_map = folium.Map(location=[51,10], zoom_start=2)
+
+    # Set up Choropleth map
+    for color, cmap, i in zip(colors, cmaps, country_lists_global_map):
+        
+        choropleth = folium.Choropleth(
+        geo_data=df_global_folium,
+        data=df_global_folium,
+        name=i,
+        columns=['name',i],
+        key_on="feature.properties.name",
+        fill_color=color,
+        colormap= cmap,
+        fill_opacity=1,
+        line_opacity=0.2,
+        show=False
+        )
+        
+        # this deletes the legend for each choropleth you add
+        for child in choropleth._children:
+            if child.startswith("color_map"):
+                del choropleth._children[child]
+
+        style_function1 = lambda x: {'fillColor': '#ffffff', 
+                            'color':'#000000', 
+                            'fillOpacity': 0.1, 
+                            'weight': 0.1}
+        highlight_function1 = lambda x: {'fillColor': '#000000', 
+                                'color':'#000000', 
+                                'fillOpacity': 0.50, 
+                                'weight': 0.1}
+        NIL1 = folium.features.GeoJson(
+            data = df_global_folium,
+            style_function=style_function1, 
+            control=False,
+            highlight_function=highlight_function1, 
+            tooltip=folium.features.GeoJsonTooltip(
+                fields=['name',"covid_total","covid_deaths","covid_cases_per_100k","covid_deaths_per_100k"],
+                aliases=['name',"covid_total","covid_deaths","covid_cases_per_100k","covid_deaths_per_100k"],
+                style=("background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;") 
+            )
+        )
+        sample_map.add_child(NIL1)
+        sample_map.keep_in_front(NIL1)
+
+        # add cmap to `sample_map`
+        sample_map.add_child(cmap)
+                
+        # add choropleth to `sample_map`
+        sample_map.add_child(choropleth)
+        
+        # bind choropleth and cmap
+        bc = BindColormap(choropleth, cmap)
+        
+        # add binding to `m`
+        sample_map.add_child(bc)
+    
+    # Add dark and light mode. 
+    folium.TileLayer('cartodbdark_matter',name="dark mode",control=True).add_to(sample_map)
+    folium.TileLayer('cartodbpositron',name="light mode",control=True).add_to(sample_map)
+
+    sample_map.add_child(folium.LayerControl())
+    return sample_map
+
 
 # Plot Number 2 - Bubble Map with animation total cases.
 @st.cache
@@ -609,6 +823,162 @@ def plot8():
     sample_map.add_child(folium.LayerControl())
     return sample_map
 
+# Create a function to create the global cases.
+@st.cache
+def get_global_cases():
+    # We import the geoJSON file. 
+    url = 'https://raw.githubusercontent.com/python-visualization/folium/master/examples/data'
+    country_shapes = f'{url}/world-countries.json'
+
+    # We read the file and print it.
+    geoJSON_df = gpd.read_file(country_shapes)
+
+    # We import the Data for global cases
+    df_global_total = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
+    df_global_total.head()
+
+    # We change the Country/Region column to name
+    df_global_total.rename(columns={'Country/Region':'name'}, inplace=True)
+
+    # We drop the columns Province/State, Lat and Long
+    df_global_total = df_global_total.drop(df_global_total.columns[[0, 2, 3]], axis=1)
+    df_global_total = df_global_total.groupby(by=["name"]).sum()
+    df_global_total = df_global_total
+
+    # Let's check how many entries we have in both data frames
+    # List of countries in df_global_total
+    country_lst_df_global_total = list(df_global_total.index)
+
+    # list of countries in geoJson file
+    country_lst_geoJSON = list(geoJSON_df.name.values)
+
+    # We need to clean the data. As you can see above country names such as US that should be South Korea instead.
+    geoJSON_df["name"].replace({'United States of America':'US'}, inplace = True)
+    geoJSON_df["name"].replace({'South Korea':'Korea, South'}, inplace = True)
+    geoJSON_df["name"].replace({'The Bahamas':'Bahamas'}, inplace = True)
+    geoJSON_df["name"].replace({'Ivory Coast':'Cote d\'Ivoire'}, inplace = True)
+    geoJSON_df["name"].replace({'Republic of the Congo':'Congo (Brazzaville)'}, inplace = True)
+    geoJSON_df["name"].replace({'Democratic Republic of the Congo':'Congo (Kinshasa)'}, inplace = True)
+    geoJSON_df["name"].replace({'United Republic of Tanzania':'Tanzania'}, inplace = True)
+    geoJSON_df["name"].replace({'Czech Republic':'Czechia'}, inplace = True)
+    geoJSON_df["name"].replace({'Republic of Serbia':'Serbia'}, inplace = True)
+
+    # Next we merge our df_global_total and the geoJSON data frame on the key name.
+    final_total_cases = geoJSON_df.merge(df_global_total,how="left",on = "name")
+    final_total_cases = final_total_cases.fillna(0)
+
+    # We import the Data for global deaths
+    df_global_death = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
+
+    # We change the Country/Region column to name
+    df_global_death.rename(columns={'Country/Region':'name'}, inplace=True)
+
+    # We drop the columns Province/State, Lat and Long
+    df_global_death = df_global_death.drop(df_global_death.columns[[0, 2, 3]], axis=1)
+    df_global_death = df_global_death.groupby(by=["name"]).sum()
+    df_global_death = df_global_death
+    df_global_death = df_global_death.fillna(0)
+
+    # Next we create our dataframe for the folium map. 
+    # We want the country names, the geometry and total number of cases and total number of deaths. 
+    df_global_folium = final_total_cases
+    df_global_folium = df_global_folium.iloc[:,[1,2,-1]]
+
+    # We change the column name for the date to total cases 
+    df_global_folium.rename(columns={ df_global_folium.columns[-1]: "covid_total" }, inplace = True)
+
+    # We need to add the total deaths to df_global_folium
+    # We reset the index
+    df_global_death.reset_index(level=0,inplace=True)
+
+    # We grab only the name column and the last column
+    df_global_death_name_last_column = df_global_death.iloc[:,[0,-1]]
+
+    # We change the column name for the date to total cases 
+    df_global_death_name_last_column.rename(columns={ df_global_death_name_last_column.columns[-1]: "covid_deaths" }, inplace = True)
+
+    # Next we merge the total deaths to the df_global_folium
+    df_global_folium = df_global_folium.merge(df_global_death_name_last_column,how="left", on = "name")
+    return df_global_folium["covid_total"].sum()
+
+# Create a function to create the global cases.
+@st.cache
+def get_global_deaths():
+    # We import the geoJSON file. 
+    url = 'https://raw.githubusercontent.com/python-visualization/folium/master/examples/data'
+    country_shapes = f'{url}/world-countries.json'
+
+    # We read the file and print it.
+    geoJSON_df = gpd.read_file(country_shapes)
+
+    # We import the Data for global cases
+    df_global_total = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
+    df_global_total.head()
+
+    # We change the Country/Region column to name
+    df_global_total.rename(columns={'Country/Region':'name'}, inplace=True)
+
+    # We drop the columns Province/State, Lat and Long
+    df_global_total = df_global_total.drop(df_global_total.columns[[0, 2, 3]], axis=1)
+    df_global_total = df_global_total.groupby(by=["name"]).sum()
+    df_global_total = df_global_total
+
+    # Let's check how many entries we have in both data frames
+    # List of countries in df_global_total
+    country_lst_df_global_total = list(df_global_total.index)
+
+    # list of countries in geoJson file
+    country_lst_geoJSON = list(geoJSON_df.name.values)
+
+    # We need to clean the data. As you can see above country names such as US that should be South Korea instead.
+    geoJSON_df["name"].replace({'United States of America':'US'}, inplace = True)
+    geoJSON_df["name"].replace({'South Korea':'Korea, South'}, inplace = True)
+    geoJSON_df["name"].replace({'The Bahamas':'Bahamas'}, inplace = True)
+    geoJSON_df["name"].replace({'Ivory Coast':'Cote d\'Ivoire'}, inplace = True)
+    geoJSON_df["name"].replace({'Republic of the Congo':'Congo (Brazzaville)'}, inplace = True)
+    geoJSON_df["name"].replace({'Democratic Republic of the Congo':'Congo (Kinshasa)'}, inplace = True)
+    geoJSON_df["name"].replace({'United Republic of Tanzania':'Tanzania'}, inplace = True)
+    geoJSON_df["name"].replace({'Czech Republic':'Czechia'}, inplace = True)
+    geoJSON_df["name"].replace({'Republic of Serbia':'Serbia'}, inplace = True)
+
+    # Next we merge our df_global_total and the geoJSON data frame on the key name.
+    final_total_cases = geoJSON_df.merge(df_global_total,how="left",on = "name")
+    final_total_cases = final_total_cases.fillna(0)
+
+    # We import the Data for global deaths
+    df_global_death = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
+
+    # We change the Country/Region column to name
+    df_global_death.rename(columns={'Country/Region':'name'}, inplace=True)
+
+    # We drop the columns Province/State, Lat and Long
+    df_global_death = df_global_death.drop(df_global_death.columns[[0, 2, 3]], axis=1)
+    df_global_death = df_global_death.groupby(by=["name"]).sum()
+    df_global_death = df_global_death
+    df_global_death = df_global_death.fillna(0)
+
+    # Next we create our dataframe for the folium map. 
+    # We want the country names, the geometry and total number of cases and total number of deaths. 
+    df_global_folium = final_total_cases
+    df_global_folium = df_global_folium.iloc[:,[1,2,-1]]
+
+    # We change the column name for the date to total cases 
+    df_global_folium.rename(columns={ df_global_folium.columns[-1]: "covid_total" }, inplace = True)
+
+    # We need to add the total deaths to df_global_folium
+    # We reset the index
+    df_global_death.reset_index(level=0,inplace=True)
+
+    # We grab only the name column and the last column
+    df_global_death_name_last_column = df_global_death.iloc[:,[0,-1]]
+
+    # We change the column name for the date to total cases 
+    df_global_death_name_last_column.rename(columns={ df_global_death_name_last_column.columns[-1]: "covid_deaths" }, inplace = True)
+
+    # Next we merge the total deaths to the df_global_folium
+    df_global_folium = df_global_folium.merge(df_global_death_name_last_column,how="left", on = "name")
+    return df_global_folium["covid_deaths"].sum()
+
 
 # We create our Streamlit App
 def main():
@@ -670,14 +1040,14 @@ def main():
         row3_spacer1, row3_1, row3_spacer2 = st.beta_columns((.1, 3.2, .1))  
         with row3_1:
             # We get the date 
-            # today = date.today()
-            # current_date = today.strftime("%B %d, %Y")
-            # st.subheader('1. Global Situation:')
-            # global_cases = round(get_global_cases())
-            # global_deaths = round(get_global_deaths())
-            # st.markdown("As of **{}**, there have been **{}** positive Covid19 cases and **{}** deaths globally. Below is a Folium Choropleth that shows the total cases, total deaths, total cases per capita (100,000), and total deaths per capita (100,000). **Please click on the layer control to select the different maps**. In addition to that, you can hover over each country to see more information.".format(current_date,global_cases,global_deaths))
-            # folium_plot1 = plot1()
-            # folium_static(folium_plot1)
+            today = date.today()
+            current_date = today.strftime("%B %d, %Y")
+            st.subheader('1. Global Situation:')
+            global_cases = round(get_global_cases())
+            global_deaths = round(get_global_deaths())
+            st.markdown("As of **{}**, there have been **{}** positive Covid19 cases and **{}** deaths globally. Below is a Folium Choropleth that shows the total cases, total deaths, total cases per capita (100,000), and total deaths per capita (100,000). **Please click on the layer control to select the different maps**. In addition to that, you can hover over each country to see more information.".format(current_date,global_cases,global_deaths))
+            folium_plot1 = plot1()
+            folium_static(folium_plot1)
             
             
             # Adding time series bubble maps with animation.
