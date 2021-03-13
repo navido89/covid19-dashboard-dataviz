@@ -3,4 +3,5 @@ pandas
 plotly.express
 geopandas
 numpy
-branca 
+branca
+folium 

@@ -9,6 +9,7 @@ from streamlit_folium import folium_static
 import geopandas as gpd
 import numpy as np
 import branca
+from branca.element import MacroElement
 
 # WHO Global Data
 who_global_data = "https://covid19.who.int/WHO-COVID-19-global-data.csv"
