@@ -983,20 +983,21 @@ def get_global_deaths():
 # We create our Streamlit App
 def main():
     st.set_page_config(layout="wide")
-    
     st.title("COVID-19 - Dashboard")
-    
+    st.markdown('A Web App by [Navid Mashinchi](http://www.navidma.com)') 
+    st.markdown("[![Star](https://img.shields.io/github/stars/navido89.svg?logo=github&style=social)](https://github.com/navido89)&nbsp[![Follow](https://img.shields.io/twitter/follow/NMashinchi?style=social)](https://twitter.com/NMashinchi)") 
+
     # First Row
     row0_spacer1, row0_1, row0_spacer2, row0_2, row0_spacer3 = st.beta_columns((.1, 2, .2, 1, .1))
 
     # Create the sidebar
-    st.sidebar.title("COVID-19 - Dashboard")
-    st.sidebar.markdown('A Web App by [Navid Mashinchi](http://www.navidma.com)') 
-    st.sidebar.markdown("[![Star](https://img.shields.io/github/stars/navido89.svg?logo=github&style=social)](https://github.com/navido89)&nbsp[![Follow](https://img.shields.io/twitter/follow/NMashinchi?style=social)](https://twitter.com/NMashinchi)") 
+    st.sidebar.image('./images/streamlit-logo.png')
     st.sidebar.title("Navigation")
-   
     options = st.sidebar.radio("Go to",['Home','Global Situation', 'Situation by WHO Region', 'Situation in the United States'], key='1')
-    
+    st.sidebar.markdown("")
+    st.sidebar.image('https://media.giphy.com/media/dVuyBgq2z5gVBkFtDc/giphy.gif')
+
+
     # Main Page
     if options == "Home":
         row1_spacer1, row1_1, row1_spacer2 = st.beta_columns((.1, 3.2, .1))
