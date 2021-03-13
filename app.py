@@ -112,31 +112,31 @@ def main():
 
             # Global Situation Page
             if options == "Global Situation":
-            # We create the third row.
-            row3_spacer1, row3_1, row3_spacer2 = st.beta_columns((.1, 3.2, .1))  
-            with row3_1:
-                # We get the date 
-                # today = date.today()
-                # current_date = today.strftime("%B %d, %Y")
-                # st.subheader('1. Global Situation:')
-                # global_cases = round(get_global_cases())
-                # global_deaths = round(get_global_deaths())
-                # st.markdown("As of **{}**, there have been **{}** positive Covid19 cases and **{}** deaths globally. Below is a Folium Choropleth that shows the total cases, total deaths, total cases per capita (100,000), and total deaths per capita (100,000). **Please click on the layer control to select the different maps**. In addition to that, you can hover over each country to see more information.".format(current_date,global_cases,global_deaths))
-                # folium_plot1 = plot1()
-                # folium_static(folium_plot1)
-                
-                
-                # Adding time series bubble maps with animation.
-                bubble_plot1 = plot2()
-                st.plotly_chart(bubble_plot1)
-                bubble_plot2 = plot3()
-                st.plotly_chart(bubble_plot2)
-                
-                # Adding Time Series Bar Plot.
-                tsa_plot1 = plot4()
-                st.plotly_chart(tsa_plot1)
-                tsa_plot2 = plot5()
-                st.plotly_chart(tsa_plot2)
+                # We create the third row.
+                row3_spacer1, row3_1, row3_spacer2 = st.beta_columns((.1, 3.2, .1))  
+                with row3_1:
+                    # We get the date 
+                    # today = date.today()
+                    # current_date = today.strftime("%B %d, %Y")
+                    # st.subheader('1. Global Situation:')
+                    # global_cases = round(get_global_cases())
+                    # global_deaths = round(get_global_deaths())
+                    # st.markdown("As of **{}**, there have been **{}** positive Covid19 cases and **{}** deaths globally. Below is a Folium Choropleth that shows the total cases, total deaths, total cases per capita (100,000), and total deaths per capita (100,000). **Please click on the layer control to select the different maps**. In addition to that, you can hover over each country to see more information.".format(current_date,global_cases,global_deaths))
+                    # folium_plot1 = plot1()
+                    # folium_static(folium_plot1)
+                    
+                    
+                    # Adding time series bubble maps with animation.
+                    bubble_plot1 = plot2()
+                    st.plotly_chart(bubble_plot1)
+                    bubble_plot2 = plot3()
+                    st.plotly_chart(bubble_plot2)
+                    
+                    # Adding Time Series Bar Plot.
+                    tsa_plot1 = plot4()
+                    st.plotly_chart(tsa_plot1)
+                    tsa_plot2 = plot5()
+                    st.plotly_chart(tsa_plot2)
 
     
    
