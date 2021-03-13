@@ -10,6 +10,7 @@ import geopandas as gpd
 import numpy as np
 import branca
 from branca.element import MacroElement
+from jinja2 import Template
 
 # WHO Global Data
 who_global_data = "https://covid19.who.int/WHO-COVID-19-global-data.csv"

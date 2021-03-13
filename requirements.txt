@@ -6,4 +6,6 @@ numpy
 branca
 folium
 streamlit_folium
-lxml 
+lxml
+jinja2 
+branca.element
