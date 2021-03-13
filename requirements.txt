@@ -5,4 +5,5 @@ geopandas
 numpy
 branca
 folium
-streamlit_folium 
+streamlit_folium
+lxml 
