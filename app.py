@@ -1,7 +1,6 @@
 # We import the libraries
 import streamlit as st
-import plotly.express as px # This is for bubble maps
-import plotly *  # This is for bar plots 
+import plotly.express as px # This is for bubble maps and bar plots
 import pandas as pd 
 
 # WHO Global Data
