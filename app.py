@@ -1,6 +1,60 @@
 # We import the libraries
 import streamlit as st
+import plotly.express as px # This is for bubble maps
+import pandas as pd 
 
+# Plot Number 2 - Bubble Map with animation total cases.
+who_global_data = "https://covid19.who.int/WHO-COVID-19-global-data.csv"
+@st.cache
+def plot2():
+    # We grab the data
+    df_timeseries = pd.read_csv(who_global_data)
+
+    # We change the date column to a datetime type
+    df_timeseries["Date_reported"] = pd.to_datetime(df_timeseries["Date_reported"])
+
+    # We groupby months and aggregate the cases 
+    x = (df_timeseries.groupby([pd.Grouper(key='Date_reported', freq='MS'), 'Country'])['New_cases']
+    .sum()
+    .reset_index())
+
+    x["New_cases"] = x["New_cases"].abs()
+    x["Date_reported"] = x["Date_reported"].dt.strftime('%m/%Y')
+    x["Date_reported"] = x['Date_reported'].astype(object)
+
+    # Here we plot bubble map with Plotly Express
+    fig = px.scatter_geo(x, locations="Country", color="Country",
+                        locationmode='country names',hover_name="Country", size="New_cases",
+                        animation_frame="Date_reported",
+                        projection="natural earth")
+    fig.update_layout(title_text = "Covid19 Cases Globally Per Month - Time Series Bubble Map Animation",showlegend=False)
+    return fig
+
+# Plot Number 3 - Bubble Map with animation total deaths
+@st.cache
+def plot3():
+    # Now we create a bubble map for the total deaths
+    # We groupby months and aggregate the deaths 
+    df_timeseries = pd.read_csv(who_global_data)
+
+    # We change the date column to a datetime type
+    df_timeseries["Date_reported"] = pd.to_datetime(df_timeseries["Date_reported"])
+
+    x1 = (df_timeseries.groupby([pd.Grouper(key='Date_reported', freq='MS'), 'Country'])['New_deaths']
+    .sum()
+    .reset_index())
+
+    x1["New_deaths"] = x1["New_deaths"].abs()
+    x1["Date_reported"] = x1["Date_reported"].dt.strftime('%m/%Y')
+    x1["Date_reported"] = x1['Date_reported'].astype(object)
+
+    # Here we plot bubble map with Plotly Express
+    fig1 = px.scatter_geo(x1, locations="Country", color="Country",
+                        locationmode='country names',hover_name="Country", size="New_deaths",
+                        animation_frame="Date_reported",
+                        projection="natural earth")
+    fig1.update_layout(title_text = "Covid19 Deaths Globally Per Month - Time Series Bubble Map Animation" ,showlegend=False)
+    return fig1
 
 # We create our Streamlit App
 def main():
@@ -23,6 +77,7 @@ def main():
    
     options = st.sidebar.selectbox("Please Select A Page",['Home','Global Situation', 'Situation by WHO Region', 'Situation in the United States'], key='1')
     
+    # Main Page
     if options == "Home":
         row1_spacer1, row1_1, row1_spacer2 = st.beta_columns((.1, 3.2, .1))
 
@@ -54,6 +109,34 @@ def main():
             st.markdown('**GeoJSON - Data:**')
             st.markdown('* [World geoJSON file](https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/world-countries.json)')
             st.markdown('* [US geoJSON file](https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/us-states.json)')
+
+            # Global Situation Page
+            if options == "Global Situation":
+            # We create the third row.
+            row3_spacer1, row3_1, row3_spacer2 = st.beta_columns((.1, 3.2, .1))  
+            with row3_1:
+                # We get the date 
+                # today = date.today()
+                # current_date = today.strftime("%B %d, %Y")
+                # st.subheader('1. Global Situation:')
+                # global_cases = round(get_global_cases())
+                # global_deaths = round(get_global_deaths())
+                # st.markdown("As of **{}**, there have been **{}** positive Covid19 cases and **{}** deaths globally. Below is a Folium Choropleth that shows the total cases, total deaths, total cases per capita (100,000), and total deaths per capita (100,000). **Please click on the layer control to select the different maps**. In addition to that, you can hover over each country to see more information.".format(current_date,global_cases,global_deaths))
+                # folium_plot1 = plot1()
+                # folium_static(folium_plot1)
+                
+                
+                # Adding time series bubble maps with animation.
+                bubble_plot1 = plot2()
+                st.plotly_chart(bubble_plot1)
+                bubble_plot2 = plot3()
+                st.plotly_chart(bubble_plot2)
+                
+                # Adding Time Series Bar Plot.
+                tsa_plot1 = plot4()
+                st.plotly_chart(tsa_plot1)
+                tsa_plot2 = plot5()
+                st.plotly_chart(tsa_plot2)
 
     
    
