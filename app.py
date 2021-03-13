@@ -1,7 +1,7 @@
 # We import the libraries
 import streamlit as st
 import plotly.express as px # This is for bubble maps
-import plotly.graph_objects as go # This is for bar plots 
+import plotly *  # This is for bar plots 
 import pandas as pd 
 
 # WHO Global Data
@@ -77,11 +77,8 @@ def plot4():
     # Create lists to iterate over
     lst = ['New_cases','Cumulative_cases']
 
-    # plotly figure setup
-    fig2 = go.Figure()
-
     # one trace for each df column
-    fig2.add_trace(go.Bar(name="Global Cases Situation",x=df["Date_reported"].values, y=df["New_cases"].values))
+    fig2 = px.bar(x=df["Date_reported"].values, y=df["New_cases"].values)
 
     # one button for each df column
     updatemenu= []
@@ -124,8 +121,8 @@ def plot5():
 
     # We set up the second plot
     lst2 = ['New_deaths', 'Cumulative_deaths']
-    fig3 = go.Figure()
-    fig3.add_trace(go.Bar(name="Global Deaths Situation",x=df["Date_reported"].values, y=df["New_deaths"].values))
+    
+    fig3 = px.bar(x=df["Date_reported"].values, y=df["New_deaths"].values)
 
     updatemenu2= []
     buttons2=[]
