@@ -985,7 +985,7 @@ def main():
     st.set_page_config(layout="wide")
     st.title("COVID-19 - Dashboard")
     st.markdown('A Web App by [Navid Mashinchi](http://www.navidma.com)') 
-    st.markdown("[![Star](https://img.shields.io/github/stars/navido89.svg?logo=github&style=social)](https://github.com/navido89)&nbsp[![Follow](https://img.shields.io/twitter/follow/NMashinchi?style=social)](https://twitter.com/NMashinchi)") 
+    st.markdown("[![Follow](https://img.shields.io/github/followers/navido89?style=social)](https://github.com/navido89)&nbsp[![Follow](https://img.shields.io/twitter/follow/NMashinchi?style=social)](https://twitter.com/NMashinchi)") 
 
     # First Row
     row0_spacer1, row0_1, row0_spacer2, row0_2, row0_spacer3 = st.beta_columns((.1, 2, .2, 1, .1))
@@ -996,7 +996,17 @@ def main():
     options = st.sidebar.radio("Go to",['Home','Global Situation', 'Situation by WHO Region', 'Situation in the United States'], key='1')
     st.sidebar.markdown("")
     st.sidebar.image('https://media.giphy.com/media/dVuyBgq2z5gVBkFtDc/giphy.gif')
-
+    
+    # Date for side bar
+    today_date = date.today()
+    current_date_side_bar = today_date.strftime("%B %d, %Y")
+    
+    # Global cases and deaths for side bar
+    global_cases_side_bar = round(get_global_cases())
+    global_deaths_side_bar = round(get_global_deaths())   
+    st.sidebar.markdown("* Date: **{}**".format(current_date_side_bar))
+    st.sidebar.markdown("* Global Cases: **{}**".format(global_cases_side_bar))
+    st.sidebar.markdown("* Global Deaths: **{}**".format(global_deaths_side_bar))
 
     # Main Page
     if options == "Home":
