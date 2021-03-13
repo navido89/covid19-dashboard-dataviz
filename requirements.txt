@@ -4,4 +4,5 @@ plotly.express
 geopandas
 numpy
 branca
-folium 
+folium
+streamlit_folium 
