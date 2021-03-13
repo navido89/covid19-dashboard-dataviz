@@ -100,7 +100,7 @@ def plot4():
         yanchor="top",  font = dict(color = "green"))])
 
     fig2.update_traces(marker_color='green')
-    fig2.update_layout(showlegend=True, updatemenus=updatemenu, title_text = "Global Cases")
+    fig2.update_layout(showlegend=True, updatemenus=updatemenu, title_text = "Global Cases",xaxis_title="Date",yaxis_title="Values")
     fig2.update_xaxes(categoryorder= 'array', categoryarray= df.index)
     return fig2 
 
@@ -142,7 +142,7 @@ def plot5():
         yanchor="top",  font = dict(color = "red"))])
 
     fig3.update_traces(marker_color='red')
-    fig3.update_layout(showlegend=True, updatemenus=updatemenu2, title_text = "Global Deaths")
+    fig3.update_layout(showlegend=True, updatemenus=updatemenu2, title_text = "Global Deaths", xaxis_title="Date",yaxis_title="Values")
     fig3.update_xaxes(categoryorder= 'array', categoryarray= df.index)
     return fig3
 
@@ -259,7 +259,8 @@ def plot6():
         yanchor="top",  font = dict(color = "black"))])
 
     fig.update_traces(marker_color=['orange','green','purple','brown','blue','pink'])
-    fig.update_layout(showlegend=False, updatemenus=updatemenu,title_text = "Actual Numbers")
+    fig.update_layout(showlegend=False, updatemenus=updatemenu,title_text = "Actual Numbers",xaxis_title="WHO_Region",
+    yaxis_title="Values")
     fig.update_xaxes(categoryorder= 'array', categoryarray= df.index)
     return fig
 
@@ -373,7 +374,7 @@ def plot7():
         yanchor="top",  font = dict(color = "black"))])
 
     fig2.update_traces(marker_color=['orange','green','purple','brown','blue','pink'])
-    fig2.update_layout(showlegend=False, updatemenus=updatemenu2,title_text = "Numbers Per Capita")
+    fig2.update_layout(showlegend=False, updatemenus=updatemenu2,title_text = "Numbers Per Capita",xaxis_title="WHO_Region",yaxis_title="Values")
     fig2.update_xaxes(categoryorder= 'array', categoryarray= df.index)
     return fig2
 
