@@ -133,10 +133,10 @@ def main():
                     st.plotly_chart(bubble_plot2)
                     
                     # Adding Time Series Bar Plot.
-                    tsa_plot1 = plot4()
-                    st.plotly_chart(tsa_plot1)
-                    tsa_plot2 = plot5()
-                    st.plotly_chart(tsa_plot2)
+                    # tsa_plot1 = plot4()
+                    # st.plotly_chart(tsa_plot1)
+                    # tsa_plot2 = plot5()
+                    # st.plotly_chart(tsa_plot2)
 
     
    
