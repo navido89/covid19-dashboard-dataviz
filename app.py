@@ -1084,6 +1084,35 @@ def plot11():
     fig.update_yaxes(title="Values")
     return fig
 
+
+# Create variant summary table
+@st.cache(suppress_st_warning=True)
+def vairant_summary():
+    # Pull in the data from the cdc 
+    cdc_vairants_data = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03112021_Web-UpdateCSV-TABLE.csv")
+
+    # Change the column names
+    cdc_vairants_data.columns = ["State", "UK Variant", "Brazil Variant", "South Africa Variant"]
+    
+    # Let's create a table:
+    reported_cases_in_us = cdc_vairants_data.sum(axis=0)
+    reported_cases_in_us = pd.DataFrame(reported_cases_in_us)
+    reported_cases_in_us = reported_cases_in_us[1:]
+    reported_cases_in_us.columns = ['Reported Cases in US']
+    
+    # Lets get the numbers of states reporting each of the variant
+    number_of_states_reporting_uk_v = np.count_nonzero(cdc_vairants_data["UK Variant"])
+    number_of_states_reporting_br_v = np.count_nonzero(cdc_vairants_data["Brazil Variant"])
+    number_of_states_reporting_sa_v = np.count_nonzero(cdc_vairants_data["South Africa Variant"])
+
+    d = {'UK Variant': [number_of_states_reporting_uk_v], 'Brazil Variant': [number_of_states_reporting_br_v],'South Africa Variant': [number_of_states_reporting_sa_v]}
+    variant_summary_df = pd.DataFrame(data=d)
+    variant_summary_df = variant_summary_df.transpose()
+    variant_summary_df.columns = ["Number of Jurisdictions Reporting"]
+ 
+    variant_summary_df["Reported Cases in US"] = reported_cases_in_us['Reported Cases in US']
+    return variant_summary_df 
+
 # We create our Streamlit App
 def main():
     st.set_page_config(layout="wide")
@@ -1134,6 +1163,7 @@ def main():
             st.markdown('* [US Deaths](https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv) by Johns Hopkins CCSE.')
             st.markdown("* [Global Data](https://covid19.who.int/WHO-COVID-19-global-data.csv) by World Health Organization")
             st.markdown("* [US Vaccine Data](https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/us_state_vaccinations.csv) by Our World in Data")
+            st.markdown("* [US COVID-19 Cases Variants Data](https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03112021_Web-UpdateCSV-TABLE.csv) by Centers for Disease Control and Prevention (CDC)")
 
             # Population Data:
             st.markdown('**Population - Data:**')
@@ -1153,7 +1183,7 @@ def main():
             # We get the date 
             today = date.today()
             current_date = today.strftime("%B %d, %Y")
-            st.subheader('1. Global Situation:')
+            st.title('1. Global Situation:')
             global_cases = round(get_global_cases())
             global_deaths = round(get_global_deaths())
             st.markdown("As of **{}**, there have been **{}** positive COVID-19 cases and **{}** deaths globally. Below is a Folium Choropleth that shows the total cases, total deaths, total cases per capita (100,000), and total deaths per capita (100,000). **Please click on the layer control to select the different maps**. In addition to that, you can hover over each country to see more information.".format(current_date,global_cases,global_deaths))
@@ -1186,7 +1216,7 @@ def main():
         row3_spacer1, row3_1, row3_spacer2 = st.beta_columns((.1, 3.2, .1))  
         with row3_1:
             # Adding bar plots for WHO regions.
-            st.subheader('2. Situatoin by WHO Regions:')
+            st.title('2. Situatoin by WHO Regions:')
             st.markdown("The World Health Organization (WHO) divides its regions into 6 separate regions. The division is for the purposes of reporting, analysis, and administration. Below is a picture that shows the 6 different regions.")
             st.markdown("![WHO Regions](https://www.researchgate.net/profile/Anna-Lena-Lopez/publication/277779794/figure/fig3/AS:339883563470854@1458045964167/World-Health-Organization-regions.png)")
             who_plot1 = plot6()
@@ -1198,7 +1228,7 @@ def main():
     if options == "Situation in the United States":
         row4_spacer1, row4_1, row4_spacer2 = st.beta_columns((.1, 3.2, .1))  
         with row4_1:
-            st.subheader('3. Situation in the United States:')
+            st.title('3. Situation in the United States:')
             st.markdown("![USA Covid Picture](https://989bull.com/wp-content/uploads/2020/06/expert-warns-us-could-see-up-to-400000-covid-19-deaths-by-spring-2021.jpg)")
             st.markdown("Here the focus is on the United States and its current state regarding COVID-19 and its Vaccine situation by the state. To better understand the vaccine features, please read below.")
             st.markdown("* **people_fully_vaccinated**: total number of people who received all doses prescribed by the vaccination protocol. If a person receives the first dose of a 2-dose vaccine, this metric stays the same. If they receive the second dose, the metric goes up by 1.")
@@ -1211,6 +1241,8 @@ def main():
             # add the Vertical Bar Plots
             US_vacc = plot11()
             st.plotly_chart(US_vacc)
+            st.subheader("US COVID-19 Cases Caused by Variants")
+            st.table(vairant_summary())
    
 if __name__ == '__main__':
     main()
