@@ -9,4 +9,4 @@ streamlit_folium
 lxml
 jinja2 
 datetime
-plotly.graph_objects
+plotly
