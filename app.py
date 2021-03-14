@@ -350,8 +350,9 @@ def plot4():
         yanchor="top",  font = dict(color = "green"))])
 
     fig2.update_traces(marker_color='green')
-    fig2.update_layout(showlegend=True, updatemenus=updatemenu, title_text = "Global Cases",xaxis_title="Date",yaxis_title="Values")
+    fig2.update_layout(showlegend=True, updatemenus=updatemenu, title_text = "Global Cases",xaxis_title="Dates",yaxis_title="Values")
     fig2.update_xaxes(categoryorder= 'array', categoryarray= df.index)
+    
     return fig2 
 
 @st.cache
@@ -392,7 +393,7 @@ def plot5():
         yanchor="top",  font = dict(color = "red"))])
 
     fig3.update_traces(marker_color='red')
-    fig3.update_layout(showlegend=True, updatemenus=updatemenu2, title_text = "Global Deaths", xaxis_title="Date",yaxis_title="Values")
+    fig3.update_layout(showlegend=True, updatemenus=updatemenu2, title_text = "Global Deaths", xaxis_title="Dates",yaxis_title="Values")
     fig3.update_xaxes(categoryorder= 'array', categoryarray= df.index)
     return fig3
 
@@ -980,6 +981,109 @@ def get_global_deaths():
     return df_global_folium["covid_deaths"].sum()
 
 
+# Create top 5 cases plot.
+@st.cache(suppress_st_warning=True)
+def plot9():
+    df_global_total = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
+
+    # We change the Country/Region column to name
+    df_global_total.rename(columns={'Country/Region':'name'}, inplace=True)
+    df_global_total.head()
+
+    # We drop the columns Province/State, Lat and Long
+    df_global_total = df_global_total.drop(df_global_total.columns[[0, 2, 3]], axis=1)
+    df_global_total = df_global_total.groupby(by=["name"]).sum()
+    df_global_total = df_global_total
+    top10_cases = df_global_total.sort_values(df_global_total.columns[-1],ascending=False).head(5)
+    top10_cases = top10_cases.transpose()
+    
+    # top10_cases.rename(columns=top10_cases.iloc[0],inplace= True)
+    # top10_cases = top10_cases[1:]
+    fig1 = px.line(top10_cases, x=top10_cases.index, y=top10_cases.columns)
+    fig1.update_layout(title="Top 5 Countries - Total Cases")
+    fig1.update_xaxes(title="Dates")
+    fig1.update_yaxes(title="Values")
+
+    return fig1
+
+# Create top 5 cases plot.
+@st.cache(suppress_st_warning=True)
+def plot10():
+    # We import the Data for global deaths
+    df_global_death = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
+   
+    # We change the Country/Region column to name
+    df_global_death.rename(columns={'Country/Region':'name'}, inplace=True)
+    
+    # We drop the columns Province/State, Lat and Long
+    df_global_death = df_global_death.drop(df_global_death.columns[[0, 2, 3]], axis=1)
+    df_global_death = df_global_death.groupby(by=["name"]).sum()
+    df_global_death = df_global_death
+    df_global_death = df_global_death.fillna(0)
+    top10_deaths = df_global_death.sort_values(df_global_death.columns[-1],ascending=False).head(5)
+    top10_deaths = top10_deaths.transpose()
+    
+    fig2 = px.line(top10_deaths, x=top10_deaths.index, y=top10_deaths.columns)
+    fig2.update_layout(title="Top 5 Countries - Total Deaths")
+    fig2.update_xaxes(title="Dates")
+    fig2.update_yaxes(title="Values")
+
+    return fig2
+
+# Create US Vaccine data.
+@st.cache(suppress_st_warning=True)
+def plot11():
+    vaccine_data = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/us_state_vaccinations.csv")
+
+    us_people_vac_data = vaccine_data[["date","location","people_fully_vaccinated",'people_fully_vaccinated_per_hundred',"total_distributed"]]
+    us_people_vac_data  = us_people_vac_data .fillna(0)
+    
+    todays_date = us_people_vac_data["date"].iloc[-1]
+    us_people_vac_data = us_people_vac_data[us_people_vac_data["date"] == todays_date]
+    
+    a = ['American Samoa','Bureau of Prisons','Dept of Defense','Federated States of Micronesia','Indian Health Svc','Long Term Care','Puerto Rico','Republic of Palau','United States','Veterans Healht']
+
+    us_people_vac_data = us_people_vac_data[~us_people_vac_data['location'].isin(a)]
+
+    # We plot the data now per   
+    df = us_people_vac_data
+
+    # Create lists to iterate over
+    lst = ["people_fully_vaccinated",'people_fully_vaccinated_per_hundred',"total_distributed"]
+
+    # Sort the column people fully vaccinated.
+    df = df.sort_values("people_fully_vaccinated", ascending=False)
+
+    # one trace for each df column
+    fig = px.bar(x=df["location"].values, y=df["people_fully_vaccinated"].values)
+
+    # one button for each df column
+    updatemenu= []
+    buttons=[]
+
+    for i in lst:
+        df = df.sort_values(i, ascending=False)
+        buttons.append(dict(method='restyle',label = str(i),args=[{'x':[df["location"].values],'y':[df[i].values],},[0]]))
+
+    # some adjustments to the updatemenus
+    button_layer_1_height = 1.25
+    updatemenu = list([dict(
+        buttons = buttons,
+        direction="down",
+        pad={"r":10,"t":10},
+        showactive=True,
+        x= 0.37,
+        xanchor="left",
+        y=button_layer_1_height,
+        yanchor="top",  font = dict(color = "black"))])
+
+    fig.update_traces(marker_color= "grey")
+    fig.update_layout(showlegend=False, updatemenus=updatemenu,title = "Vaccine Info by State")
+    fig.update_xaxes(categoryorder= 'array', categoryarray= df.index)
+    fig.update_xaxes(title="States") 
+    fig.update_yaxes(title="Values")
+    return fig
+
 # We create our Streamlit App
 def main():
     st.set_page_config(layout="wide")
@@ -1056,17 +1160,25 @@ def main():
             folium_plot1 = plot1()
             folium_static(folium_plot1)
             
-            # Adding time series bubble maps with animation.
-            bubble_plot1 = plot2()
-            st.plotly_chart(bubble_plot1)
-            bubble_plot2 = plot3()
-            st.plotly_chart(bubble_plot2)
-            
+            # Adding Top 5 Cases plot
+            top5_country_cases = plot9()
+            st.plotly_chart(top5_country_cases)
+
+            # Adding Top 5 Deaths plot
+            top5_country_deaths = plot10()
+            st.plotly_chart(top5_country_deaths)
+
             # Adding Time Series Bar Plot.
             tsa_plot1 = plot4()
             st.plotly_chart(tsa_plot1)
             tsa_plot2 = plot5()
             st.plotly_chart(tsa_plot2)
+
+            # Adding time series bubble maps with animation.
+            bubble_plot1 = plot2()
+            st.plotly_chart(bubble_plot1)
+            bubble_plot2 = plot3()
+            st.plotly_chart(bubble_plot2)
     
     # WHO Region Pge
     if options == "Situation by WHO Region":
@@ -1095,6 +1207,10 @@ def main():
             st.markdown('**Please click on the layer control to select the different maps**. In addition to that, you can hover over each state to see more information.')
             folium_plot8 = plot8()
             folium_static(folium_plot8)
+
+            # add the Vertical Bar Plots
+            US_vacc = plot11()
+            st.plotly_chart(US_vacc)
    
 if __name__ == '__main__':
     main()
