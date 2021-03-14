@@ -10,6 +10,8 @@ import branca
 from branca.element import MacroElement
 from jinja2 import Template
 from datetime import date
+import plotly.graph_objects as go
+
 
 # WHO Global Data
 who_global_data = "https://covid19.who.int/WHO-COVID-19-global-data.csv"
@@ -1084,6 +1086,142 @@ def plot11():
     fig.update_yaxes(title="Values")
     return fig
 
+# Create US Variant Plot States Comparison.
+@st.cache(suppress_st_warning=True)
+def plot12():
+    # Second plot
+    cdc_vairants_data2 = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03112021_Web-UpdateCSV-TABLE.csv")
+
+    # Check for states to remove. we need 50
+    cdc_vairants_data2_state_lst = cdc_vairants_data2.State.values
+   
+    # Remove AS,GU,MH,FM,MP,PW,PR,DC
+    cdc_vairants_data2["State"].replace({
+        'AL': 'Alabama',
+        'AK': 'Alaska',
+        'AZ': 'Arizona',
+        'AR': 'Arkansas',
+        'CA': 'California',
+        'CO': 'Colorado',
+        'CT': 'Connecticut',
+        'DE': 'Delaware',
+        'FL': 'Florida',
+        'GA': 'Georgia',
+        'HI': 'Hawaii',
+        'ID': 'Idaho',
+        'IL': 'Illinois',
+        'IN': 'Indiana',
+        'IA': 'Iowa',
+        'KS': 'Kansas',
+        'KY': 'Kentucky',
+        'LA': 'Louisiana',
+        'ME': 'Maine',
+        'MD': 'Maryland',
+        'MA': 'Massachusetts',
+        'MI': 'Michigan',
+        'MN': 'Minnesota',
+        'MS': 'Mississippi',
+        'MO': 'Missouri',
+        'MT': 'Montana',
+        'NE': 'Nebraska',
+        'NV': 'Nevada',
+        'NH': 'New Hampshire',
+        'NJ': 'New Jersey',
+        'NM': 'New Mexico',
+        'NY': 'New York',
+        'NC': 'North Carolina',
+        'ND': 'North Dakota',
+        'OH': 'Ohio',
+        'OK': 'Oklahoma',
+        'OR': 'Oregon',
+        'PA': 'Pennsylvania',
+        'RI': 'Rhode Island',
+        'SC': 'South Carolina',
+        'SD': 'South Dakota',
+        'TN': 'Tennessee',
+        'TX': 'Texas',
+        'UT': 'Utah',
+        'VT': 'Vermont',
+        'VA': 'Virginia',
+        'WA': 'Washington',
+        'WV': 'West Virginia',
+        'WI': 'Wisconsin',
+        'WY': 'Wyoming',
+    }
+    , inplace = True)
+
+    # Removing some States that aren't part of the 50 current US States. Thos are territories.
+    cdc_vairants_data2 = cdc_vairants_data2[cdc_vairants_data2["State"]!= "AS"]
+    cdc_vairants_data2 = cdc_vairants_data2[cdc_vairants_data2["State"]!= "DC"]
+    cdc_vairants_data2 = cdc_vairants_data2[cdc_vairants_data2["State"]!= "GU"]
+    cdc_vairants_data2 = cdc_vairants_data2[cdc_vairants_data2["State"]!= "MH"]
+    cdc_vairants_data2 = cdc_vairants_data2[cdc_vairants_data2["State"]!= "FM"]
+    cdc_vairants_data2 = cdc_vairants_data2[cdc_vairants_data2["State"]!= "MP"]
+    cdc_vairants_data2 = cdc_vairants_data2[cdc_vairants_data2["State"]!= "PW"]
+    cdc_vairants_data2 = cdc_vairants_data2[cdc_vairants_data2["State"]!= "PR"]
+    cdc_vairants_data2 = cdc_vairants_data2[cdc_vairants_data2["State"]!= "VI"]
+
+    # Take the transpose
+    cdc_vairants_data = cdc_vairants_data2.transpose()
+
+    # Take the first row and make it the column.
+    cdc_vairants_data.columns = cdc_vairants_data.iloc[0]
+    cdc_vairants_data = cdc_vairants_data[1:]
+
+    df = cdc_vairants_data
+
+    # plotly figure setup
+    fig = go.Figure()
+
+    # one trace for each df column
+    fig.add_trace(go.Bar(name="Selection 1",x=df.index, y=df["Alabama"].values))
+
+    # one trace for each df column
+    fig.add_trace(go.Bar(name="Selection 2",x=df.index, y=df["Alabama"].values))
+
+
+    # one button for each df column
+    updatemenu= []
+    buttons=[]
+
+    # add second buttons
+    buttons2 = []
+
+    for i in list(df.columns):
+        buttons.append(dict(method='restyle',label = str(i),args=[{'x':[df.index],'y':[df[i].values]},[0]])
+                    )
+    
+    for i in list(df.columns):
+        buttons2.append(dict(method='restyle',label = str(i),args=[{'x':[df.index],'y':[df[i].values]},[1]])
+                    )
+
+    # some adjustments to the updatemenus
+    button_layer_1_height = 1.23
+    updatemenu = list([dict(
+        buttons = buttons,
+        direction="down",
+        pad={"r":10,"t":10},
+        showactive=True,
+        x= 0.1,
+        xanchor="left",
+        y= button_layer_1_height,
+        yanchor="top",
+        font = dict(color = "blue")
+    ),dict(
+        buttons = buttons2,
+        direction="down",
+        pad={"r":10,"t":10},
+        showactive=True,
+        x= 0.37,
+        xanchor="left",
+        y=button_layer_1_height,
+        yanchor="top",font = dict(color = "red"))])
+
+
+    fig.update_layout(showlegend=True, updatemenus=updatemenu)
+    return fig
+
+
 
 # Create variant summary table
 @st.cache(suppress_st_warning=True)
@@ -1241,8 +1379,15 @@ def main():
             # add the Vertical Bar Plots
             US_vacc = plot11()
             st.plotly_chart(US_vacc)
+
+            # Add Variant Table
             st.subheader("US COVID-19 Cases Caused by Variants")
             st.table(vairant_summary())
+
+            # Add State Comparison of different Variants plot.
+            st.subheader("Comparison between Variants by US States")
+            US_variant_comp = plot12()
+            st.plotly_chart(US_variant_comp)
    
 if __name__ == '__main__':
     main()
