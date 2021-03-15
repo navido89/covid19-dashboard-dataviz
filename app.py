@@ -359,8 +359,8 @@ def plot4():
     return fig2 
 
 @st.cache
-# Plot Number 4 - WHO Pie Chart 
-def plot4():
+# Plot Number 4a - WHO Pie Chart 
+def plot4a():
     df_cont = pd.read_csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
     df_cont = df_cont.groupby(['Date_reported','WHO_region'])[['New_cases', 'New_deaths','Cumulative_cases','Cumulative_deaths']].sum()
     df_cont = df_cont.unstack()
@@ -1241,7 +1241,7 @@ def main():
             st.title('2. Situatoin by WHO Regions:')
             st.markdown("The World Health Organization (WHO) divides its regions into 6 separate regions. The division is for the purposes of reporting, analysis, and administration. Below is a picture that shows the 6 different regions.")
             st.markdown("![WHO Regions](https://www.researchgate.net/profile/Anna-Lena-Lopez/publication/277779794/figure/fig3/AS:339883563470854@1458045964167/World-Health-Organization-regions.png)")
-            who_plot1 = plot4()
+            who_plot1 = plot4a()
             st.plotly_chart(who_plot1)
            
     # US Situation Page
