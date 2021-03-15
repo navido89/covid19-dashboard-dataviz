@@ -1162,7 +1162,7 @@ def main():
     st.sidebar.markdown("* Global Cases: **{}**".format(global_cases_side_bar))
     st.sidebar.markdown("* Global Deaths: **{}**".format(global_deaths_side_bar))
 
-    # Main Page
+    # Main Page.
     if options == "Home":
         row1_spacer1, row1_1, row1_spacer2 = st.beta_columns((.1, 3.2, .1))
 
