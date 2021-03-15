@@ -11,6 +11,7 @@ from branca.element import MacroElement
 from jinja2 import Template
 from datetime import date
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 
 # WHO Global Data
@@ -358,6 +359,121 @@ def plot4():
     return fig2 
 
 @st.cache
+# Plot Number 4 - WHO Pie Chart 
+def plot4():
+    df_cont = pd.read_csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
+    df_cont = df_cont.groupby(['Date_reported','WHO_region'])[['New_cases', 'New_deaths','Cumulative_cases','Cumulative_deaths']].sum()
+    df_cont = df_cont.unstack()
+    
+    # We grab the Cumulative_cases column
+    df_cont_Cumulative_cases = df_cont["Cumulative_cases"]
+
+    # We change the column names with the appropriate region names
+    df_cont_Cumulative_cases.rename(columns={'AFRO':'Africa','AMRO':'Americas','EMRO':'Eastern Mediterranean','EURO':'Europe',"SEARO":'South-East Asia','WPRO':'Western Pacific'}, inplace=True)
+
+    # We drop the other column
+    df_cont_Cumulative_cases.drop("Other", axis=1, inplace = True)
+
+    # We grab the last row
+    df_cont_Cumulative_cases = df_cont_Cumulative_cases.tail(1)
+
+    # We take the transpose
+    df_cont_Cumulative_cases = df_cont_Cumulative_cases.transpose()
+
+    # We rename the column to Total Cases
+    df_cont_Cumulative_cases.set_axis(['Total_Cases'], axis=1, inplace=True)
+
+    # We grab the Cumulative_deaths column
+    df_cont_Cumulative_deaths = df_cont["Cumulative_deaths"]
+
+    # We change the column names with the appropriate region names
+    df_cont_Cumulative_deaths.rename(columns={'AFRO':'Africa','AMRO':'Americas','EMRO':'Eastern Mediterranean','EURO':'Europe',"SEARO":'South-East Asia','WPRO':'Western Pacific'}, inplace=True)
+
+    # We drop the other column
+    df_cont_Cumulative_deaths.drop("Other", axis=1, inplace = True)
+
+    # We grab the last row
+    df_cont_Cumulative_deaths = df_cont_Cumulative_deaths.tail(1)
+
+    # We take the transpose
+    df_cont_Cumulative_deaths = df_cont_Cumulative_deaths.transpose()
+
+    # We change the column name
+    df_cont_Cumulative_deaths.set_axis(['Total_Deaths'], axis=1, inplace=True)
+
+    # We now merge the two dataframes
+    cont_totals = pd.concat([df_cont_Cumulative_cases, df_cont_Cumulative_deaths], axis=1)
+    cont_totals = cont_totals.reset_index()
+    
+    # Here we import the population data from WHO.
+    df_who_pop = pd.read_csv("https://apps.who.int/gho/athena/data/xmart.csv?target=GHO/WHS9_86,WHS9_88,WHS9_89,WHS9_92,WHS9_96,WHS9_97,WHS9_90&profile=crosstable&filter=COUNTRY:-;REGION:*&x-sideaxis=REGION&x-topaxis=GHO;YEAR")
+    
+    # We grab the 3 columns in interest.
+    df_who_pop = df_who_pop[["Unnamed: 0","Population (in thousands) total","Annual population growth rate (%)"]]
+    df_who_pop.drop([0,1], inplace = True)
+
+    # We need to convert Population (in thousands) total and Annual population growth rate (%) to numeric types.
+
+    # We remove the white spaces
+    df_who_pop["Population (in thousands) total"] = df_who_pop["Population (in thousands) total"].str.replace(' ', '')
+
+    # We convert them to numeric columns
+    df_who_pop["Population (in thousands) total"] = pd.to_numeric(df_who_pop["Population (in thousands) total"])
+    df_who_pop["Annual population growth rate (%)"] = pd.to_numeric(df_who_pop["Annual population growth rate (%)"])
+
+    df_who_pop["2021_Population (in thousands)"] = round((df_who_pop["Population (in thousands) total"] * (df_who_pop["Annual population growth rate (%)"]/100)*5)+ df_who_pop["Population (in thousands) total"]) 
+    
+    # We convert the 2021 population in thousands to millions again.
+    df_who_pop["2021_Population (in thousands)"] = (df_who_pop["2021_Population (in thousands)"] / 1000)*1000000
+
+    pd.set_option('display.float_format', '{:.0f}'.format)
+    df_who_pop.rename(columns={"2021_Population (in thousands)": "Population"}, inplace = True)
+
+    # We now merge the population number with our cont_totals data frame
+
+    # First we need to change the column name of Unnamed:0 to WHO_region so we can merge
+    df_who_pop.rename(columns={"Unnamed: 0": "WHO_region"}, inplace = True)
+    cont_totals = pd.merge(cont_totals,df_who_pop, on = ["WHO_region"])
+
+    # We select the columns in interest.
+    cont_totals = cont_totals[["WHO_region","Population","Total_Cases","Total_Deaths"]]
+
+    # Next we calculate the cases and deaths per 1 million per continent
+    # We now calculate the the Total Cases and Total Deaths by 100 million.
+    cont_totals['Total_Cases_Per_100mill'] = cont_totals.apply(lambda x: (x.Total_Cases/x.Population * 100000000), axis = 1)
+    cont_totals['Total_Deaths_Per_100mill'] = cont_totals.apply(lambda x: (x.Total_Deaths/x.Population  * 100000000), axis = 1)
+    
+    labels = cont_totals.WHO_region.values
+    colors = ['gold', 'mediumturquoise', 'darkorange', 'lightgreen']
+
+    # Create subplots: use 'domain' type for Pie subplot
+    fig = make_subplots(rows=2, cols=2, specs=[[{'type':'domain'}, {'type':'domain'}],[{'type':'domain'}, {'type':'domain'}]])
+    fig.add_trace(go.Pie(labels=labels, values=cont_totals.Total_Cases.values, name="Total Cases"),
+                1, 1)
+    fig.add_trace(go.Pie(labels=labels, values=cont_totals.Total_Deaths.values, name="Total Deaths"),
+                1, 2)
+              
+    fig.add_trace(go.Pie(labels=labels, values=cont_totals.Total_Cases_Per_100mill.values, name="Total_Cases_Per_100mil"),
+                2, 1)
+    fig.add_trace(go.Pie(labels=labels, values=cont_totals.Total_Deaths_Per_100mill.values, name="Total_Deaths_Per_100mil"),
+                2, 2)
+
+    # Use `hole` to create a donut-like pie chart
+    fig.update_traces(hole=.4, hoverinfo="label+percent+name",marker=dict(colors=colors, line=dict(color='#000000', width=2)))
+
+    fig.update_layout(
+        width=920, height=820,
+        title_text="WHO Regions in Compairson",
+        # Add annotations in the center of the donut pies.
+        annotations=[dict(text='Cases', x=0.19, y=0.81, font_size=14, showarrow=False),
+                    dict(text='Deaths', x=0.82, y=0.81, font_size=14, showarrow=False),
+                    dict(text='Cases Per', x=0.17, y=0.2, font_size=14, showarrow=False),
+                    dict(text='100 Mil', x=0.18, y=0.15, font_size=14, showarrow=False),
+                    dict(text='Deaths Per', x=0.84, y=0.2, font_size=14, showarrow=False),
+                    dict(text='100 Mil', x=0.82, y=0.15, font_size=14, showarrow=False)])
+    return fig
+
+@st.cache
 # Plot Number 5 - Time Series Bar Plot 2
 def plot5():
     # We import the data
@@ -398,239 +514,6 @@ def plot5():
     fig3.update_layout(showlegend=True, updatemenus=updatemenu2, title_text = "Global Deaths", xaxis_title="Dates",yaxis_title="Values")
     fig3.update_xaxes(categoryorder= 'array', categoryarray= df.index)
     return fig3
-
-
-@st.cache(suppress_st_warning=True)
-# Plot Number 6 - Bart Plot WHO Regions 1
-def plot6():
-    df_cont = pd.read_csv(who_global_data)
-    df_cont = df_cont.groupby(['Date_reported','WHO_region'])[['New_cases', 'New_deaths','Cumulative_cases','Cumulative_deaths']].sum()
-    df_cont = df_cont.unstack()
-
-    # We grab the Cumulative_cases column
-    df_cont_Cumulative_cases = df_cont["Cumulative_cases"]
-
-    # We change the column names with the appropriate region names
-    df_cont_Cumulative_cases.rename(columns={'AFRO':'Africa','AMRO':'Americas','EMRO':'Eastern Mediterranean','EURO':'Europe',"SEARO":'South-East Asia','WPRO':'Western Pacific'}, inplace=True)
-
-    # We drop the other column
-    df_cont_Cumulative_cases.drop("Other", axis=1, inplace = True)
-
-    # We grab the last row
-    df_cont_Cumulative_cases = df_cont_Cumulative_cases.tail(1)
-
-    # We take the transpose
-    df_cont_Cumulative_cases = df_cont_Cumulative_cases.transpose()
-
-    # We rename the column to Total Cases
-    df_cont_Cumulative_cases.set_axis(['Total_Cases'], axis=1, inplace=True)
-
-    # We grab the Cumulative_deaths column
-    df_cont_Cumulative_deaths = df_cont["Cumulative_deaths"]
-
-    # We change the column names with the appropriate region names
-    df_cont_Cumulative_deaths.rename(columns={'AFRO':'Africa','AMRO':'Americas','EMRO':'Eastern Mediterranean','EURO':'Europe',"SEARO":'South-East Asia','WPRO':'Western Pacific'}, inplace=True)
-
-    # We drop the other column
-    df_cont_Cumulative_deaths.drop("Other", axis=1, inplace = True)
-
-    # We grab the last row
-    df_cont_Cumulative_deaths = df_cont_Cumulative_deaths.tail(1)
-
-    # We take the transpose
-    df_cont_Cumulative_deaths = df_cont_Cumulative_deaths.transpose()
-
-    # We change the column name
-    df_cont_Cumulative_deaths.set_axis(['Total_Deaths'], axis=1, inplace=True)
-
-    # We now merge the two dataframes
-    cont_totals = pd.concat([df_cont_Cumulative_cases, df_cont_Cumulative_deaths], axis=1)
-    cont_totals = cont_totals.reset_index()
-
-    # Here we import the population data from WHO.
-    df_who_pop = pd.read_csv("https://apps.who.int/gho/athena/data/xmart.csv?target=GHO/WHS9_86,WHS9_88,WHS9_89,WHS9_92,WHS9_96,WHS9_97,WHS9_90&profile=crosstable&filter=COUNTRY:-;REGION:*&x-sideaxis=REGION&x-topaxis=GHO;YEAR")
-
-    # We grab the 3 columns in interest.
-    df_who_pop = df_who_pop[["Unnamed: 0","Population (in thousands) total","Annual population growth rate (%)"]]
-    df_who_pop.drop([0,1], inplace = True)
-
-    # We need to convert Population (in thousands) total and Annual population growth rate (%) to numeric types.
-    # We remove the white spaces
-    df_who_pop["Population (in thousands) total"] = df_who_pop["Population (in thousands) total"].str.replace(' ', '')
-
-    # We convert them to numeric columns
-    df_who_pop["Population (in thousands) total"] = pd.to_numeric(df_who_pop["Population (in thousands) total"])
-    df_who_pop["Annual population growth rate (%)"] = pd.to_numeric(df_who_pop["Annual population growth rate (%)"])
-    df_who_pop["2021_Population (in thousands)"] = round((df_who_pop["Population (in thousands) total"] * (df_who_pop["Annual population growth rate (%)"]/100)*5)+ df_who_pop["Population (in thousands) total"]) 
-
-    # We convert the 2021 population in thousands to millions again.
-    df_who_pop["2021_Population (in thousands)"] = (df_who_pop["2021_Population (in thousands)"] / 1000)*1000000
-
-    pd.set_option('display.float_format', '{:.0f}'.format)
-    df_who_pop.rename(columns={"2021_Population (in thousands)": "Population"}, inplace = True)
-
-    # We now merge the population number with our cont_totals data frame
-    # First we need to change the column name of Unnamed:0 to WHO_region so we can merge
-    df_who_pop.rename(columns={"Unnamed: 0": "WHO_region"}, inplace = True)
-    cont_totals = pd.merge(cont_totals,df_who_pop, on = ["WHO_region"])
-
-    # We select the columns in interest.
-    cont_totals = cont_totals[["WHO_region","Population","Total_Cases","Total_Deaths"]]
-
-    # Next we calculate the cases and deaths per 1 million per continent
-    # We now calculate the the Total Cases and Total Deaths by 100 million.
-    cont_totals['Total_Cases_Per_100mill'] = cont_totals.apply(lambda x: (x.Total_Cases/x.Population * 100000000), axis = 1)
-    cont_totals['Total_Deaths_Per_100mill'] = cont_totals.apply(lambda x: (x.Total_Deaths/x.Population  * 100000000), axis = 1)
-    
-    # We plot the data now per   
-    df = cont_totals
-
-    # Create lists to iterate over
-    lst = ['Total_Cases','Total_Deaths']
-
-    # one trace for each df column
-    fig = px.bar(x=df["WHO_region"].values, y=df["Total_Cases"].values)
-
-    # one button for each df column
-    updatemenu= []
-    buttons=[]
-
-    for i in lst:
-        buttons.append(dict(method='restyle',label = str(i),args=[{'x':[df["WHO_region"].values],'y':[df[i].values]},[0]])
-                    )
-    
-    # some adjustments to the updatemenus
-    button_layer_1_height = 1.25
-    updatemenu = list([dict(
-        buttons = buttons,
-        direction="down",
-        pad={"r":10,"t":10},
-        showactive=True,
-        x= 0.37,
-        xanchor="left",
-        y=button_layer_1_height,
-        yanchor="top",  font = dict(color = "black"))])
-
-    fig.update_traces(marker_color=['orange','green','purple','brown','blue','pink'])
-    fig.update_layout(showlegend=False, updatemenus=updatemenu,title_text = "Actual Numbers",xaxis_title="WHO_Region",
-    yaxis_title="Values")
-    fig.update_xaxes(categoryorder= 'array', categoryarray= df.index)
-    return fig
-
-
-@st.cache(suppress_st_warning=True)
-# Plot Number 7 - Bart Plot WHO Regions 2
-def plot7():
-    df_cont = pd.read_csv(who_global_data)
-    df_cont = df_cont.groupby(['Date_reported','WHO_region'])[['New_cases', 'New_deaths','Cumulative_cases','Cumulative_deaths']].sum()
-    df_cont = df_cont.unstack()
-
-    # We grab the Cumulative_cases column
-    df_cont_Cumulative_cases = df_cont["Cumulative_cases"]
-
-    # We change the column names with the appropriate region names
-    df_cont_Cumulative_cases.rename(columns={'AFRO':'Africa','AMRO':'Americas','EMRO':'Eastern Mediterranean','EURO':'Europe',"SEARO":'South-East Asia','WPRO':'Western Pacific'}, inplace=True)
-
-    # We drop the other column
-    df_cont_Cumulative_cases.drop("Other", axis=1, inplace = True)
-
-    # We grab the last row
-    df_cont_Cumulative_cases = df_cont_Cumulative_cases.tail(1)
-
-    # We take the transpose
-    df_cont_Cumulative_cases = df_cont_Cumulative_cases.transpose()
-
-    # We rename the column to Total Cases
-    df_cont_Cumulative_cases.set_axis(['Total_Cases'], axis=1, inplace=True)
-
-    # We grab the Cumulative_deaths column
-    df_cont_Cumulative_deaths = df_cont["Cumulative_deaths"]
-
-    # We change the column names with the appropriate region names
-    df_cont_Cumulative_deaths.rename(columns={'AFRO':'Africa','AMRO':'Americas','EMRO':'Eastern Mediterranean','EURO':'Europe',"SEARO":'South-East Asia','WPRO':'Western Pacific'}, inplace=True)
-
-    # We drop the other column
-    df_cont_Cumulative_deaths.drop("Other", axis=1, inplace = True)
-
-    # We grab the last row
-    df_cont_Cumulative_deaths = df_cont_Cumulative_deaths.tail(1)
-
-    # We take the transpose
-    df_cont_Cumulative_deaths = df_cont_Cumulative_deaths.transpose()
-
-    # We change the column name
-    df_cont_Cumulative_deaths.set_axis(['Total_Deaths'], axis=1, inplace=True)
-
-    # We now merge the two dataframes
-    cont_totals = pd.concat([df_cont_Cumulative_cases, df_cont_Cumulative_deaths], axis=1)
-    cont_totals = cont_totals.reset_index()
-
-    # Here we import the population data from WHO.
-    df_who_pop = pd.read_csv("https://apps.who.int/gho/athena/data/xmart.csv?target=GHO/WHS9_86,WHS9_88,WHS9_89,WHS9_92,WHS9_96,WHS9_97,WHS9_90&profile=crosstable&filter=COUNTRY:-;REGION:*&x-sideaxis=REGION&x-topaxis=GHO;YEAR")
-
-    # We grab the 3 columns in interest.
-    df_who_pop = df_who_pop[["Unnamed: 0","Population (in thousands) total","Annual population growth rate (%)"]]
-    df_who_pop.drop([0,1], inplace = True)
-
-    # We need to convert Population (in thousands) total and Annual population growth rate (%) to numeric types.
-    # We remove the white spaces
-    df_who_pop["Population (in thousands) total"] = df_who_pop["Population (in thousands) total"].str.replace(' ', '')
-
-    # We convert them to numeric columns
-    df_who_pop["Population (in thousands) total"] = pd.to_numeric(df_who_pop["Population (in thousands) total"])
-    df_who_pop["Annual population growth rate (%)"] = pd.to_numeric(df_who_pop["Annual population growth rate (%)"])
-    df_who_pop["2021_Population (in thousands)"] = round((df_who_pop["Population (in thousands) total"] * (df_who_pop["Annual population growth rate (%)"]/100)*5)+ df_who_pop["Population (in thousands) total"]) 
-
-    # We convert the 2021 population in thousands to millions again.
-    df_who_pop["2021_Population (in thousands)"] = (df_who_pop["2021_Population (in thousands)"] / 1000)*1000000
-
-    pd.set_option('display.float_format', '{:.0f}'.format)
-    df_who_pop.rename(columns={"2021_Population (in thousands)": "Population"}, inplace = True)
-
-    # We now merge the population number with our cont_totals data frame
-    # First we need to change the column name of Unnamed:0 to WHO_region so we can merge
-    df_who_pop.rename(columns={"Unnamed: 0": "WHO_region"}, inplace = True)
-    cont_totals = pd.merge(cont_totals,df_who_pop, on = ["WHO_region"])
-
-    # We select the columns in interest.
-    cont_totals = cont_totals[["WHO_region","Population","Total_Cases","Total_Deaths"]]
-
-    # Next we calculate the cases and deaths per 1 million per continent
-    # We now calculate the the Total Cases and Total Deaths by 100 million.
-    cont_totals['Total_Cases_Per_100mill'] = cont_totals.apply(lambda x: (x.Total_Cases/x.Population * 100000000), axis = 1)
-    cont_totals['Total_Deaths_Per_100mill'] = cont_totals.apply(lambda x: (x.Total_Deaths/x.Population  * 100000000), axis = 1)
-    
-    # We plot the data now per   
-    df = cont_totals
-
-    # We set up the second plot
-    lst2 = ['Total_Cases_Per_100mill', 'Total_Deaths_Per_100mill']
-   
-    fig2 = px.bar(x=df["WHO_region"].values, y=df["Total_Deaths"].values)
-
-    updatemenu2= []
-    buttons2=[]
-
-    for i in lst2:
-        buttons2.append(dict(method='restyle',label = str(i),args=[{'x':[df["WHO_region"].values],'y':[df[i].values]},[0]])
-                    )
-
-    button_layer_1_height = 1.25
-    updatemenu2 = list([dict(
-        buttons = buttons2,
-        direction="down",
-        pad={"r":10,"t":10},
-        showactive=True,
-        x= 0.37,
-        xanchor="left",
-        y=button_layer_1_height,
-        yanchor="top",  font = dict(color = "black"))])
-
-    fig2.update_traces(marker_color=['orange','green','purple','brown','blue','pink'])
-    fig2.update_layout(showlegend=False, updatemenus=updatemenu2,title_text = "Numbers Per Capita",xaxis_title="WHO_Region",yaxis_title="Values")
-    fig2.update_xaxes(categoryorder= 'array', categoryarray= df.index)
-    return fig2
-
 
 # Plot Number 8 - Folium Map US Situation
 def plot8():
@@ -1091,6 +974,8 @@ def plot11():
 def plot12():
     # Second plot
     cdc_vairants_data2 = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03112021_Web-UpdateCSV-TABLE.csv")
+    
+    cdc_vairants_data2.columns = ["State", "UK Variant", "Brazil Variant", "South Africa Variant"]
 
     # Check for states to remove. we need 50
     cdc_vairants_data2_state_lst = cdc_vairants_data2.State.values
@@ -1178,7 +1063,6 @@ def plot12():
 
     # one trace for each df column
     fig.add_trace(go.Bar(name="Selection 2",x=df.index, y=df["Alabama"].values))
-
 
     # one button for each df column
     updatemenu= []
@@ -1348,7 +1232,7 @@ def main():
             bubble_plot2 = plot3()
             st.plotly_chart(bubble_plot2)
     
-    # WHO Region Pge
+    # WHO Region Page
     if options == "Situation by WHO Region":
         # We create the third row.
         row3_spacer1, row3_1, row3_spacer2 = st.beta_columns((.1, 3.2, .1))  
@@ -1357,11 +1241,9 @@ def main():
             st.title('2. Situatoin by WHO Regions:')
             st.markdown("The World Health Organization (WHO) divides its regions into 6 separate regions. The division is for the purposes of reporting, analysis, and administration. Below is a picture that shows the 6 different regions.")
             st.markdown("![WHO Regions](https://www.researchgate.net/profile/Anna-Lena-Lopez/publication/277779794/figure/fig3/AS:339883563470854@1458045964167/World-Health-Organization-regions.png)")
-            who_plot1 = plot6()
+            who_plot1 = plot4()
             st.plotly_chart(who_plot1)
-            who_plot2 = plot7()
-            st.plotly_chart(who_plot2)
-    
+           
     # US Situation Page
     if options == "Situation in the United States":
         row4_spacer1, row4_1, row4_spacer2 = st.beta_columns((.1, 3.2, .1))  
