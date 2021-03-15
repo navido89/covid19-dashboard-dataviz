@@ -1168,11 +1168,20 @@ def main():
 
         with row1_1:
             st.markdown("![COVID-19 Picture](https://d2jx2rerrg6sh3.cloudfront.net/image-handler/ts/20200420091641/ri/674/picture/2020/4/%40shutterstock_1647268288.jpg)")
-            st.markdown("Hey there! Welcome to my COVID-19 data visualization web app. The purpose of this project is to have a look at the current state of COVID-19 using visualizations from different geographical perspectives. The plots have been created by using data visualization tools such as Plotly and Folium. The project is broken down into three parts.")
-            st.markdown("**1.** Global COVID-19 Situation")
-            st.markdown("**2.** COVID-19 Situation by World Health Organization Region (WHO)")
-            st.markdown("**3.** COVID-19 Situation in the United States")
+            st.markdown("Welcome to my COVID-19 data visualization web app. The purpose of this project is to have a look at the current state of COVID-19 using visualizations from different geographical perspectives. The plots have been created by using data visualization tools such as Plotly and Folium. The project is broken down into three parts.")
+            st.markdown("**1.** Global COVID-19 Situation: We will display a folium map that shows the total cases, total deaths, total cases per 100,000, and total deaths per 100,000. In addition to that, we will display various time series plots to understand better how the disease spreads over time across the globe.")
+            st.markdown("**2.** COVID-19 Situation by World Health Organization Region (WHO): In the following section, we look at the disease from the World Health Organization's regional perspective. We will compare the different regions based on their total cases, total deaths, total cases per 100 million and total deaths per 100 million deaths.")
+            st.markdown("**3.** COVID-19 Situation in the United States: Last but not least, we pay our attention to the United States and explore the current situation in the US based on the cases, deaths (with and without per capita), vaccine status, and the status of the different variants spreading across the states. ")
+            st.markdown("The data is pulled from various resources, as you can see below in the Data Source section, and it will be updated daily by the various organizations listed below.")
+            st.markdown("If you have any questions regarding this project or require any further information, feel free to [contact me](https://www.navidma.com/contact).")
+            #We will write the GitHub link here.
+            st.subheader('GitHub Link:')
+            st.markdown('* [GitHub Repo](https://github.com/navido89/covid19-dashboard-dataviz)')
             
+            #We will list the libraries here.
+            st.subheader('Technologies:')
+            st.markdown("Streamlit, Plotly, Folium, Pandas, GeoPandas, NumPy, Branca, Jinja2, Date.")
+    
             #We will list the data source.
             st.subheader('Data Source:')
             
@@ -1249,7 +1258,7 @@ def main():
         with row4_1:
             st.title('3. Situation in the United States:')
             st.markdown("![USA Covid Picture](https://989bull.com/wp-content/uploads/2020/06/expert-warns-us-could-see-up-to-400000-covid-19-deaths-by-spring-2021.jpg)")
-            st.markdown("Here the focus is on the United States and its current state regarding COVID-19 and its Vaccine situation by the state. To better understand the vaccine features, please read below.")
+            st.markdown("Here the focus is on the United States and its current state regarding COVID-19, its Vaccine situation, and the different variants of the disease. To better understand the vaccine variables, please read below.")
             st.markdown("* **people_fully_vaccinated**: total number of people who received all doses prescribed by the vaccination protocol. If a person receives the first dose of a 2-dose vaccine, this metric stays the same. If they receive the second dose, the metric goes up by 1.")
             st.markdown("* **people_fully_vaccinated_per_hundred**: people_fully_vaccinated per 100 people in the total population of the state. ")
             st.markdown("* **total_distributed**: cumulative counts of COVID-19 vaccine doses recorded as shipped in CDC's Vaccine Tracking System. ")
