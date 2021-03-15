@@ -13,7 +13,6 @@ from datetime import date
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-
 # WHO Global Data
 who_global_data = "https://covid19.who.int/WHO-COVID-19-global-data.csv"
 
