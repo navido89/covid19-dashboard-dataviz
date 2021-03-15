@@ -1144,7 +1144,7 @@ def main():
     # First Row
     row0_spacer1, row0_1, row0_spacer2, row0_2, row0_spacer3 = st.beta_columns((.1, 2, .2, 1, .1))
 
-    # Create the sidebar
+    # Create the sidebar.
     st.sidebar.image('./images/streamlit-logo.png')
     st.sidebar.title("Navigation")
     options = st.sidebar.radio("Go to",['Home','Global Situation', 'Situation by WHO Region', 'Situation in the United States'], key='1')
