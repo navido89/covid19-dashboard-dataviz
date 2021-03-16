@@ -7,7 +7,7 @@
 # COVID-19 Dashboar - Web App
 **Project Status: Completed**
 <br>
-Check out <a href="https://share.streamlit.io/navido89/covid19-dashboard-dataviz/app.py" target="_blank">my app.</a>
+Click <a href="https://share.streamlit.io/navido89/covid19-dashboard-dataviz/app.py" target="_blank">here </a> to check out my app.
 
 ## Table of contents
 - [Project Objective](#project-objective)
@@ -73,5 +73,9 @@ If you have any questions regarding this project or require any further informat
 ## Installation:
 [(Back to top)](#table-of-contents)
 + Clone this repo <a href="https://docs.github.com/en/free-pro-team@latest/github/creating-cloning-and-archiving-repositories/cloning-a-repository" target="_blank">(for help see this tutorial).</a>
-+ Once you cloned this repo, make sure you install the required libraries and run the following command in your directory: streamlit run app.py. For more on how Streamlit works<a href="https://docs.streamlit.io/en/stable/installation.html" target="_blank">click here.</a>
++ Once you cloned this repo, make sure you install the required libraries and run the following command in your directory: 
+```
+streamlit run app.py
+```
++ For more on how Streamlit works<a href="https://docs.streamlit.io/en/stable/installation.html" target="_blank">click here.</a>
 
