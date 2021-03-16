@@ -9,9 +9,11 @@ import numpy as np
 import branca
 from branca.element import MacroElement
 from jinja2 import Template
-from datetime import date
+from datetime import date, datetime
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import pytz
+
 
 # WHO Global Data
 who_global_data = "https://covid19.who.int/WHO-COVID-19-global-data.csv"
@@ -1134,6 +1136,14 @@ def vairant_summary():
     variant_summary_df["Reported Cases in US"] = reported_cases_in_us['Reported Cases in US']
     return variant_summary_df 
 
+# function to get the current date
+def get_pst_time():
+    date_format="%B %d, %Y"
+    date = datetime.now(tz=pytz.utc)
+    date = date.astimezone(pytz.timezone('US/Pacific'))
+    pstDateTime=date.strftime(date_format)
+    return pstDateTime
+
 # We create our Streamlit App
 def main():
     st.set_page_config(layout="wide")
@@ -1152,13 +1162,15 @@ def main():
     st.sidebar.image('https://media.giphy.com/media/dVuyBgq2z5gVBkFtDc/giphy.gif')
     
     # Date for side bar
-    today_date = date.today()
-    current_date_side_bar = today_date.strftime("%B %d, %Y")
+    date_current = get_pst_time()
+
+ 
+
     
     # Global cases and deaths for side bar
     global_cases_side_bar = round(get_global_cases())
     global_deaths_side_bar = round(get_global_deaths())   
-    st.sidebar.markdown("* Date: **{}**".format(current_date_side_bar))
+    st.sidebar.markdown("* Date: **{}**".format(date_current))
     st.sidebar.markdown("* Global Cases: **{}**".format(global_cases_side_bar))
     st.sidebar.markdown("* Global Deaths: **{}**".format(global_deaths_side_bar))
 
@@ -1211,12 +1223,11 @@ def main():
         row3_spacer1, row3_1, row3_spacer2 = st.beta_columns((.1, 3.2, .1))  
         with row3_1:
             # We get the date 
-            today = date.today()
-            current_date = today.strftime("%B %d, %Y")
+            date_current = get_pst_time()
             st.title('1. Global Situation:')
             global_cases = round(get_global_cases())
             global_deaths = round(get_global_deaths())
-            st.markdown("As of **{}**, there have been **{}** positive COVID-19 cases and **{}** deaths globally. Below is a Folium Choropleth that shows the total cases, total deaths, total cases per capita (100,000), and total deaths per capita (100,000). **Please click on the layer control to select the different maps**. In addition to that, you can hover over each country to see more information.".format(current_date,global_cases,global_deaths))
+            st.markdown("As of **{}**, there have been **{}** positive COVID-19 cases and **{}** deaths globally. Below is a Folium Choropleth that shows the total cases, total deaths, total cases per capita (100,000), and total deaths per capita (100,000). **Please click on the layer control to select the different maps**. In addition to that, you can hover over each country to see more information.".format(date_current,global_cases,global_deaths))
             folium_plot1 = plot1()
             folium_static(folium_plot1)
             
