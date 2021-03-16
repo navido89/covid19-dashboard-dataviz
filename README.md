@@ -77,5 +77,5 @@ If you have any questions regarding this project or require any further informat
 ```
 streamlit run app.py
 ```
-+ For more on how Streamlit works<a href="https://docs.streamlit.io/en/stable/installation.html" target="_blank">click here.</a>
++ For more on how Streamlit works<a href="https://docs.streamlit.io/en/stable/installation.html" target="_blank"> click here.</a>
 
