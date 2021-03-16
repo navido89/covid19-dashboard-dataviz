@@ -158,7 +158,7 @@ def plot1():
     # Let's turn them into integers
     df_global_folium[["covid_total","covid_deaths","covid_cases_per_100k","covid_deaths_per_100k"]] = df_global_folium[["covid_total","covid_deaths","covid_cases_per_100k","covid_deaths_per_100k"]].applymap(np.int64)
 
-    df_global_folium.to_csv("data")
+    #df_global_folium.to_csv("data")
 
     lats = 1 * np.linspace(-100, -100, 167)
     lons = 1 * np.linspace(-100, -100, 167)
