@@ -7,10 +7,10 @@
 # COVID-19 Dashboar - Web App
 **Project Status: Completed**
 <br>
-<a href="https://share.streamlit.io/navido89/covid19-dashboard-dataviz/app.py" target="_blank">Check out my app.</a>
+Check out <a href="https://share.streamlit.io/navido89/covid19-dashboard-dataviz/app.py" target="_blank">my app.</a>
 
 ## Table of contents
-- [Project Objective & Description](#project-objective-description)
+- [Project Objective & Description](#project-objective)
 - [Methods Used](#methods-used)
 - [Technologies](#technologies)
 - [Installation](#installation)
