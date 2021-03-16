@@ -30,8 +30,6 @@ The data is pulled from various resources, as you can see below in the Data Sour
 
 If you have any questions regarding this project or require any further information, feel free to <a href="https://www.navidma.com/contact" target="_blank">contact me.</a>
 
-<br>
-
 ## Methods Used
 [(Back to top)](#table-of-contents)
 + Data Cleaning
@@ -75,5 +73,5 @@ If you have any questions regarding this project or require any further informat
 ## Installation:
 [(Back to top)](#table-of-contents)
 + Clone this repo <a href="https://docs.github.com/en/free-pro-team@latest/github/creating-cloning-and-archiving-repositories/cloning-a-repository" target="_blank">(for help see this tutorial).</a>
-+ Raw data, data processing/transformation script is being kept in this repo. <a href="https://github.com/navido89/Police_Force_US/blob/main/Police%20Force%20Project.ipynb" target="_blank">Click here for notebook.</a>
-+ **Note**: If GitHub doesn't load the notebook please refer to <a href="https://nbviewer.jupyter.org/github/navido89/Police_Force_US/blob/main/Police%20Force%20Project.ipynb" target="_blank">Jupyter Notebook Viewer.</a>
++ Once you cloned this repo, make sure you install the required libraries and run the following command in your directory: streamlit run app.py. For more on how Streamlit works<a href="https://docs.streamlit.io/en/stable/installation.html" target="_blank">click here.</a>
+
