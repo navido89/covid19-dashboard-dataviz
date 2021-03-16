@@ -10,7 +10,7 @@
 Check out <a href="https://share.streamlit.io/navido89/covid19-dashboard-dataviz/app.py" target="_blank">my app.</a>
 
 ## Table of contents
-- [Project Objective & Description](#project-objective)
+- [Project Objective & Description](#project-objective-description)
 - [Methods Used](#methods-used)
 - [Technologies](#technologies)
 - [Installation](#installation)
