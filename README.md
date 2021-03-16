@@ -10,12 +10,12 @@
 Check out <a href="https://share.streamlit.io/navido89/covid19-dashboard-dataviz/app.py" target="_blank">my app.</a>
 
 ## Table of contents
-- [Project Objective & Description](#project-objective-description)
+- [Project Objective](#project-objective)
 - [Methods Used](#methods-used)
 - [Technologies](#technologies)
 - [Installation](#installation)
 
-## Project Objective & Description
+## Project Objective
 [(Back to top)](#table-of-contents)
 <br>
 Welcome to my COVID-19 data visualization web app. The purpose of this project is to have a look at the current state of COVID-19 using visualizations from different geographical perspectives. The plots have been created by using data visualization tools such as Plotly and Folium. The project is broken down into three parts.
