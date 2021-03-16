@@ -2,7 +2,7 @@
 
 <!-- Add buttons here -->
 ![Follow me at Twitter](https://img.shields.io/twitter/follow/NMashinchi?style=social)
-![GitHub last commit](https://img.shields.io/github/last-commit/navido89/Time-Series-Analysis-ARIMA-Model-Covid19-Predictions)
+![GitHub last commit](https://img.shields.io/github/last-commit/navido89/covid19-dashboard-dataviz)
 
 # COVID-19 Dashboar - Web App
 **Project Status: Completed**
@@ -10,7 +10,7 @@
 <a href="https://share.streamlit.io/navido89/covid19-dashboard-dataviz/app.py" target="_blank">Check out my app.</a>
 
 ## Table of contents
-- [Project Objective](#project-objective)
+- [Project Objective & Description](#project-objective-description)
 - [Methods Used](#methods-used)
 - [Technologies](#technologies)
 - [Installation](#installation)
@@ -31,9 +31,6 @@ The data is pulled from various resources, as you can see below in the Data Sour
 If you have any questions regarding this project or require any further information, feel free to <a href="https://www.navidma.com/contact" target="_blank">contact me.</a>
 
 <br>
-<p align="center">
-<img src="images/shootings_by_year.png" style>
-</p>
 
 ## Methods Used
 [(Back to top)](#table-of-contents)
