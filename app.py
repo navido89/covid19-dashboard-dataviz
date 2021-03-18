@@ -158,12 +158,6 @@ def plot1():
     # Let's turn them into integers
     df_global_folium[["covid_total","covid_deaths","covid_cases_per_100k","covid_deaths_per_100k"]] = df_global_folium[["covid_total","covid_deaths","covid_cases_per_100k","covid_deaths_per_100k"]].applymap(np.int64)
 
-    #df_global_folium.to_csv("data")
-
-    lats = 1 * np.linspace(-100, -100, 167)
-    lons = 1 * np.linspace(-100, -100, 167)
-    colors = np.sin(1 * np.linspace(0, 0, 167))
-
     # We create the colors for the custom legends
     colors = ["YlGn","OrRd","BuPu","GnBu"]
 
@@ -886,7 +880,7 @@ def plot9():
     # top10_cases.rename(columns=top10_cases.iloc[0],inplace= True)
     # top10_cases = top10_cases[1:]
     fig1 = px.line(top10_cases, x=top10_cases.index, y=top10_cases.columns)
-    fig1.update_layout(title="Top 5 Countries - Total Cases")
+    fig1.update_layout(title="Top 5 Countries - Total Cases",xaxis_showgrid=False, yaxis_showgrid=False)
     fig1.update_xaxes(title="Dates")
     fig1.update_yaxes(title="Values")
 
@@ -910,7 +904,7 @@ def plot10():
     top10_deaths = top10_deaths.transpose()
     
     fig2 = px.line(top10_deaths, x=top10_deaths.index, y=top10_deaths.columns)
-    fig2.update_layout(title="Top 5 Countries - Total Deaths")
+    fig2.update_layout(title="Top 5 Countries - Total Deaths",xaxis_showgrid=False, yaxis_showgrid=False)
     fig2.update_xaxes(title="Dates")
     fig2.update_yaxes(title="Values")
 
@@ -964,7 +958,7 @@ def plot11():
         yanchor="top",  font = dict(color = "black"))])
 
     fig.update_traces(marker_color= "grey")
-    fig.update_layout(showlegend=False, updatemenus=updatemenu,title = "Vaccine Info by State")
+    fig.update_layout(showlegend=False, updatemenus=updatemenu,title = "Vaccine Information by State")
     fig.update_xaxes(categoryorder= 'array', categoryarray= df.index)
     fig.update_xaxes(title="States") 
     fig.update_yaxes(title="Values")
@@ -1286,7 +1280,7 @@ def main():
             st.table(vairant_summary())
 
             # Add State Comparison of different Variants plot.
-            st.subheader("Comparison between Variants by US States")
+            st.subheader("Comparison COVID-19 Cases (Caused by Vriants) by States")
             US_variant_comp = plot12()
             st.plotly_chart(US_variant_comp)
    
