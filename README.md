@@ -4,7 +4,7 @@
 ![Follow me at Twitter](https://img.shields.io/twitter/follow/NMashinchi?style=social)
 ![GitHub last commit](https://img.shields.io/github/last-commit/navido89/covid19-dashboard-dataviz)
 
-# COVID-19 Dashboar - Web App
+# COVID-19 Dashboard - Web App
 **Project Status: Completed**
 <br>
 Click <a href="https://share.streamlit.io/navido89/covid19-dashboard-dataviz/app.py" target="_blank">here </a> to check out my app.
