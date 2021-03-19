@@ -1280,7 +1280,7 @@ def main():
             st.table(vairant_summary())
 
             # Add State Comparison of different Variants plot.
-            st.subheader("Comparison COVID-19 Cases (Caused by Vriants) by States")
+            st.subheader("Comparison COVID-19 Cases (Caused by Variants) by States")
             US_variant_comp = plot12()
             st.plotly_chart(US_variant_comp)
    
