@@ -1164,9 +1164,9 @@ def main():
     # Global cases and deaths for side bar
     global_cases_side_bar = round(get_global_cases())
     global_deaths_side_bar = round(get_global_deaths())   
-    st.sidebar.markdown("* Date: **{}**".format(date_current))
-    st.sidebar.markdown("* Global Cases: **{}**".format(global_cases_side_bar))
-    st.sidebar.markdown("* Global Deaths: **{}**".format(global_deaths_side_bar))
+    st.sidebar.info("Date: **{}**".format(date_current))
+    st.sidebar.info("Global Cases: **{}**".format(global_cases_side_bar))
+    st.sidebar.info("Global Deaths: **{}**".format(global_deaths_side_bar))
 
     # Main Page.
     if options == "Home":
