@@ -7,7 +7,7 @@
 # COVID-19 Dashboard - Web App
 **Project Status: Completed**
 <br>
-Click <a href="https://share.streamlit.io/navido89/covid19-dashboard-dataviz/app.py" target="_blank">here </a> to check out my app.
+<a href="https://share.streamlit.io/navido89/covid19-dashboard-dataviz/app.py" target="_blank">Web App</a> 
 <br>
 <a href="https://towardsdatascience.com/the-current-state-of-covid-19-from-3-different-perspectives-3fbaabcd0348" target="_blank">Read Article</a>
 
