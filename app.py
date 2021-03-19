@@ -1251,7 +1251,7 @@ def main():
         row3_spacer1, row3_1, row3_spacer2 = st.beta_columns((.1, 3.2, .1))  
         with row3_1:
             # Adding bar plots for WHO regions.
-            st.title('2. Situatoin by WHO Regions:')
+            st.title('2. Situation by WHO Regions:')
             st.markdown("The World Health Organization (WHO) divides its regions into 6 separate regions. The division is for the purposes of reporting, analysis, and administration. Below is a picture that shows the 6 different regions.")
             st.markdown("![WHO Regions](https://www.researchgate.net/profile/Anna-Lena-Lopez/publication/277779794/figure/fig3/AS:339883563470854@1458045964167/World-Health-Organization-regions.png)")
             who_plot1 = plot4a()
