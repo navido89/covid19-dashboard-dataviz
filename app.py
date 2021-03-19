@@ -187,12 +187,12 @@ def plot1():
         caption='covid_deaths_per_100k')
 
     cmaps = [cmap1, cmap2,cmap3,cmap4]
-    columns_lists_global_map = ["covid_total","covid_deaths","covid_cases_per_100k","covid_deaths_per_100k"]
+    columns_list_global_map = ["covid_total","covid_deaths","covid_cases_per_100k","covid_deaths_per_100k"]
 
     sample_map = folium.Map(location=[51,10], zoom_start=2)
 
     # Set up Choropleth map
-    for color, cmap, i in zip(colors, cmaps, columns_lists_global_map):
+    for color, cmap, i in zip(colors, cmaps, columns_list_global_map):
         
         choropleth = folium.Choropleth(
         geo_data=df_global_folium,
