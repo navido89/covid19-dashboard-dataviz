@@ -8,6 +8,8 @@
 **Project Status: Completed**
 <br>
 Click <a href="https://share.streamlit.io/navido89/covid19-dashboard-dataviz/app.py" target="_blank">here </a> to check out my app.
+<br>
+<a href="https://towardsdatascience.com/the-current-state-of-covid-19-from-3-different-perspectives-3fbaabcd0348" target="_blank">Read Article</a>
 
 ## Table of contents
 - [Project Objective](#project-objective)
