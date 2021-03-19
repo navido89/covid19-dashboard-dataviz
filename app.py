@@ -187,12 +187,12 @@ def plot1():
         caption='covid_deaths_per_100k')
 
     cmaps = [cmap1, cmap2,cmap3,cmap4]
-    country_lists_global_map = ["covid_total","covid_deaths","covid_cases_per_100k","covid_deaths_per_100k"]
+    columns_lists_global_map = ["covid_total","covid_deaths","covid_cases_per_100k","covid_deaths_per_100k"]
 
     sample_map = folium.Map(location=[51,10], zoom_start=2)
 
     # Set up Choropleth map
-    for color, cmap, i in zip(colors, cmaps, country_lists_global_map):
+    for color, cmap, i in zip(colors, cmaps, columns_lists_global_map):
         
         choropleth = folium.Choropleth(
         geo_data=df_global_folium,
@@ -644,12 +644,12 @@ def plot8():
 
     cmaps = [cmap1,cmap2,cmap3,cmap4,cmap5,cmap6,cmap7]
 
-    country_lists_global_map = ["total_cases","total_deaths","total_cases_per_100k","total_deaths_per_100k",'total_distributed','people_fully_vaccinated','people_vaccinated_per_hundred']
+    columns_list_global_map = ["total_cases","total_deaths","total_cases_per_100k","total_deaths_per_100k",'total_distributed','people_fully_vaccinated','people_vaccinated_per_hundred']
 
     sample_map = folium.Map(location=[48, -102], zoom_start=3)
 
     # Set up Choropleth map
-    for color, cmap, i in zip(colors, cmaps, country_lists_global_map):
+    for color, cmap, i in zip(colors, cmaps, columns_list_global_map):
         
         choropleth = folium.Choropleth(
         geo_data=final_us_df,
@@ -1101,7 +1101,6 @@ def plot12():
     return fig
 
 
-
 # Create variant summary table
 @st.cache(suppress_st_warning=True)
 def vairant_summary():
@@ -1157,9 +1156,6 @@ def main():
     
     # Date for side bar
     date_current = get_pst_time()
-
- 
-
     
     # Global cases and deaths for side bar
     global_cases_side_bar = round(get_global_cases())
