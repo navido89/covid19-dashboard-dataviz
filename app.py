@@ -968,7 +968,7 @@ def plot11():
 @st.cache(suppress_st_warning=True)
 def plot12():
     # Second plot
-    cdc_vairants_data2 = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03112021_Web-UpdateCSV-TABLE.csv")
+    cdc_vairants_data2 = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03232021_Web-Update.csv")
     
     cdc_vairants_data2.columns = ["State", "UK Variant", "Brazil Variant", "South Africa Variant"]
 
@@ -1105,7 +1105,7 @@ def plot12():
 @st.cache(suppress_st_warning=True)
 def vairant_summary():
     # Pull in the data from the cdc 
-    cdc_vairants_data = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03112021_Web-UpdateCSV-TABLE.csv")
+    cdc_vairants_data = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03232021_Web-Update.csv")
 
     # Change the column names
     cdc_vairants_data.columns = ["State", "UK Variant", "Brazil Variant", "South Africa Variant"]
