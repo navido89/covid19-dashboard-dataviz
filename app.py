@@ -13,7 +13,7 @@ from datetime import date, datetime
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pytz
-
+from plotly.subplots import make_subplots
 
 # WHO Global Data
 who_global_data = "https://covid19.who.int/WHO-COVID-19-global-data.csv"
@@ -352,7 +352,7 @@ def plot4():
     fig2.update_xaxes(categoryorder= 'array', categoryarray= df.index)
     
     return fig2 
-
+    
 @st.cache
 # Plot Number 4a - WHO Pie Chart 
 def plot4a():
