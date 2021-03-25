@@ -255,7 +255,7 @@ def plot1():
 
 
 # Plot Number 2 - Bubble Map with animation total cases.
-@st.cache
+@st.cache(ttl=60*60*24)
 def plot2():
     # We grab the data
     df_timeseries = pd.read_csv(who_global_data)
@@ -281,7 +281,7 @@ def plot2():
     return fig
 
 # Plot Number 3 - Bubble Map with animation total deaths
-@st.cache
+@st.cache(ttl=60*60*24)
 def plot3():
     # Now we create a bubble map for the total deaths
     # We groupby months and aggregate the deaths 
@@ -307,7 +307,7 @@ def plot3():
     return fig1
 
 
-@st.cache
+@st.cache(ttl=60*60*24)
 # Plot Number 4 - Time Series Bar Plot 1
 def plot4():
     # We import the data
@@ -353,7 +353,7 @@ def plot4():
     
     return fig2 
     
-@st.cache
+@st.cache(ttl=60*60*24)
 # Plot Number 4a - WHO Pie Chart 
 def plot4a():
     df_cont = pd.read_csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
@@ -468,7 +468,7 @@ def plot4a():
                     dict(text='100 Mil', x=0.82, y=0.15, font_size=14, showarrow=False)])
     return fig
 
-@st.cache
+@st.cache(ttl=60*60*24)
 # Plot Number 5 - Time Series Bar Plot 2
 def plot5():
     # We import the data
@@ -705,7 +705,7 @@ def plot8():
     return sample_map
 
 # Create a function to create the global cases.
-@st.cache
+@st.cache(ttl=60*60*24)
 def get_global_cases():
     # We import the geoJSON file. 
     url = 'https://raw.githubusercontent.com/python-visualization/folium/master/examples/data'
@@ -783,7 +783,7 @@ def get_global_cases():
     return df_global_folium["covid_total"].sum()
 
 # Create a function to create the global cases.
-@st.cache
+@st.cache(ttl=60*60*24)
 def get_global_deaths():
     # We import the geoJSON file. 
     url = 'https://raw.githubusercontent.com/python-visualization/folium/master/examples/data'
@@ -862,7 +862,7 @@ def get_global_deaths():
 
 
 # Create top 5 cases plot.
-@st.cache(suppress_st_warning=True)
+@st.cache(suppress_st_warning=True,ttl=60*60*24)
 def plot9():
     df_global_total = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
 
@@ -887,7 +887,7 @@ def plot9():
     return fig1
 
 # Create top 5 cases plot.
-@st.cache(suppress_st_warning=True)
+@st.cache(suppress_st_warning=True,ttl=60*60*24)
 def plot10():
     # We import the Data for global deaths
     df_global_death = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
@@ -911,7 +911,7 @@ def plot10():
     return fig2
 
 # Create US Vaccine data.
-@st.cache(suppress_st_warning=True)
+@st.cache(suppress_st_warning=True,ttl=60*60*24)
 def plot11():
     vaccine_data = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/us_state_vaccinations.csv")
 
@@ -965,7 +965,7 @@ def plot11():
     return fig
 
 # Create US Variant Plot States Comparison.
-@st.cache(suppress_st_warning=True)
+@st.cache(suppress_st_warning=True,ttl=60*60*24)
 def plot12():
     # Second plot
     cdc_vairants_data2 = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03232021_Web-Update.csv")
@@ -1102,7 +1102,7 @@ def plot12():
 
 
 # Create variant summary table
-@st.cache(suppress_st_warning=True)
+@st.cache(suppress_st_warning=True,ttl=60*60*24)
 def vairant_summary():
     # Pull in the data from the cdc 
     cdc_vairants_data = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03232021_Web-Update.csv")
