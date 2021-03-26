@@ -62,7 +62,7 @@ If you have any questions regarding this project or require any further informat
 + [US Deaths](https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv) by Johns Hopkins CCSE.
 + [Global Data](https://covid19.who.int/WHO-COVID-19-global-data.csv) by World Health Organization.
 + [US Vaccine Data](https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/us_state_vaccinations.csv) by Our World in Data.
-+ [US COVID-19 Cases Variants Data](https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03112021_Web-UpdateCSV-TABLE.csv) by Centers for Disease Control and Prevention (CDC).
++ [US COVID-19 Cases Variants Data](https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03252021WebUpdateMAP.csv) by Centers for Disease Control and Prevention (CDC).
 
 **Population - Data:**
 + [2020 Population by country](https://www.kaggle.com/tanuprabhu/population-by-country-2020?select=population_by_country_2020.csv) from Kaggle.
