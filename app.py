@@ -18,6 +18,7 @@ from plotly.subplots import make_subplots
 # WHO Global Data
 who_global_data = "https://covid19.who.int/WHO-COVID-19-global-data.csv"
 
+
 # Create this for the folium map.
 class BindColormap(MacroElement):
     """Binds a colormap to a given layer.
@@ -44,6 +45,7 @@ class BindColormap(MacroElement):
                 }});
         {% endmacro %}
         """)
+
 
 # Plot Number 1 - Folium Plot
 def plot1():
