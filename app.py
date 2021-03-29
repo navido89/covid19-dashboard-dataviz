@@ -969,13 +969,14 @@ def plot11():
 # Create US Variant Plot States Comparison.
 @st.cache(suppress_st_warning=True,ttl=60*60*24)
 def plot12():
-    cdc_variants_data = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03252021WebUpdateMAP.csv")
-
-    # Check States. We need 50
-    cdc_variants_data_state_lst = cdc_variants_data.State.values
+    # Pull in the data from the cdc
+    cdc_variants_data2 = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03282021_Web-UpdateCSV-TABLE.csv")
     
+    # Check for states to remove. We need 50 states
+    cdc_variants_data2_state_lst = cdc_variants_data2.State.values
+
     # Remove AS,GU,MH,FM,MP,PW,PR,DC
-    cdc_variants_data["State"].replace({
+    cdc_variants_data2["State"].replace({
         'AL': 'Alabama',
         'AK': 'Alaska',
         'AZ': 'Arizona',
@@ -1030,39 +1031,22 @@ def plot12():
     , inplace = True)
 
     # Removing some States that aren't part of the 50 current US States. Thos are territories.
-    cdc_variants_data = cdc_variants_data[cdc_variants_data["State"]!= "AS"]
-    cdc_variants_data = cdc_variants_data[cdc_variants_data["State"]!= "DC"]
-    cdc_variants_data = cdc_variants_data[cdc_variants_data["State"]!= "GU"]
-    cdc_variants_data = cdc_variants_data[cdc_variants_data["State"]!= "MH"]
-    cdc_variants_data = cdc_variants_data[cdc_variants_data["State"]!= "FM"]
-    cdc_variants_data = cdc_variants_data[cdc_variants_data["State"]!= "MP"]
-    cdc_variants_data = cdc_variants_data[cdc_variants_data["State"]!= "PW"]
-    cdc_variants_data = cdc_variants_data[cdc_variants_data["State"]!= "PR"]
-    cdc_variants_data = cdc_variants_data[cdc_variants_data["State"]!= "VI"]
+    cdc_variants_data2 = cdc_variants_data2[cdc_variants_data2["State"]!= "AS"]
+    cdc_variants_data2 = cdc_variants_data2[cdc_variants_data2["State"]!= "DC"]
+    cdc_variants_data2 = cdc_variants_data2[cdc_variants_data2["State"]!= "GU"]
+    cdc_variants_data2 = cdc_variants_data2[cdc_variants_data2["State"]!= "MH"]
+    cdc_variants_data2 = cdc_variants_data2[cdc_variants_data2["State"]!= "FM"]
+    cdc_variants_data2 = cdc_variants_data2[cdc_variants_data2["State"]!= "MP"]
+    cdc_variants_data2 = cdc_variants_data2[cdc_variants_data2["State"]!= "PW"]
+    cdc_variants_data2 = cdc_variants_data2[cdc_variants_data2["State"]!= "PR"]
+    cdc_variants_data2 = cdc_variants_data2[cdc_variants_data2["State"]!= "VI"]
 
-    cdc_variants_data = cdc_variants_data[["State","filter","Cases"]]
+    cdc_variants_data2 = cdc_variants_data2.transpose()
 
-    # Set State to index
-    cdc_variants_data = cdc_variants_data.set_index("State")
+    cdc_variants_data2.columns = cdc_variants_data2.iloc[0]
+    cdc_variants_data2 = cdc_variants_data2[1:]
 
-    # Seperate to 3 different df per variant
-    df_117 = cdc_variants_data[cdc_variants_data["filter"]== "Variant B.1.1.7"]
-    df_p1 = cdc_variants_data[cdc_variants_data["filter"]== "Variant P.1"]
-    df_1351 = cdc_variants_data[cdc_variants_data["filter"]== "Variant B.1.351"]
-
-    # We merge the data frames 
-    variant_state_comp_df = pd.merge(pd.merge(df_117,df_p1,on='State'),df_1351,on='State')
-
-    # We grab the cases columns
-    variant_state_comp_df = variant_state_comp_df[["Cases_x","Cases_y","Cases"]]
-
-    # We rename the columns
-    variant_state_comp_df.columns = ["B.1.1.7 Cases","P.1 Cases","B.1.351 Cases"]
-
-    # We take the transpose
-    variant_state_comp_df = variant_state_comp_df.transpose()
-
-    df = variant_state_comp_df
+    df = cdc_variants_data2
 
     # plotly figure setup
     fig = go.Figure()
@@ -1106,7 +1090,7 @@ def plot12():
         direction="down",
         pad={"r":10,"t":10},
         showactive=True,
-        x= 0.50,
+        x= 0.37,
         xanchor="left",
         y=button_layer_1_height,
         yanchor="top",font = dict(color = "red"))])
@@ -1119,49 +1103,27 @@ def plot12():
 # Create variant summary table
 @st.cache(suppress_st_warning=True,ttl=60*60*24)
 def vairant_summary():
-    # Load the data
-    cdc_variants_data = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03252021WebUpdateMAP.csv")
+    # Pull in the data from the cdc 
+    cdc_variants_data = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03282021_Web-UpdateCSV-TABLE.csv")
+    
+    # Let's create a table:
+    reported_cases_in_us = cdc_variants_data.sum(axis=0)
+    reported_cases_in_us = pd.DataFrame(reported_cases_in_us)
+    reported_cases_in_us = reported_cases_in_us[1:]
+    reported_cases_in_us.columns = ['Reported Cases in US']
+    
+    number_of_states_reporting_uk_v = np.count_nonzero(cdc_variants_data['B.1.1.7 Variant '])
+    number_of_states_reporting_br_v = np.count_nonzero(cdc_variants_data['P.1 Variant '])
+    number_of_states_reporting_sa_v = np.count_nonzero(cdc_variants_data['B.1.351 Variant '])
 
-    # Fill the na values with 0
-    cdc_variants_data = cdc_variants_data.fillna(0)
+    d = {'B.1.1.7 Variant': [number_of_states_reporting_uk_v], 'P.1 Variant': [number_of_states_reporting_br_v],'B.1.351 Variant': [number_of_states_reporting_sa_v]}
+    variant_summary_df = pd.DataFrame(data=d)
+    variant_summary_df = variant_summary_df.transpose()
+    variant_summary_df.columns = ["Number of Jurisdictions Reporting"]
 
-    # Groupby filter column
-    cdc_variants_data_grouped_by_filter = cdc_variants_data.groupby("filter").sum()
+    variant_summary_df["Reported Cases in US"] = reported_cases_in_us['Reported Cases in US'].values
 
-    # Reset the index
-    cdc_variants_data_grouped_by_filter = cdc_variants_data_grouped_by_filter.reset_index()
-
-    # Skip the first row
-    cdc_variants_data_grouped_by_filter = cdc_variants_data_grouped_by_filter[1:]
-
-    # Grab the filter and cases column
-    cdc_variants_data_grouped_by_filter = cdc_variants_data_grouped_by_filter[["filter","Cases"]]
-
-    # Rename the columns
-    cdc_variants_data_grouped_by_filter.columns = ["filter","Reported Cases"]
-
-    # Filter df of variant b.1.1.7
-    variant_b117_df = cdc_variants_data[cdc_variants_data['filter']== 'Variant B.1.1.7']
-
-    # Count states reporting B.1.1.7 Variant
-    number_of_states_reporting_b117 = np.count_nonzero(variant_b117_df['Cases'])
-
-    # Filter df of variant p.1
-    variant_p1_df = cdc_variants_data[cdc_variants_data['filter']== 'Variant P.1']
-
-    # Count states reporting p.1 Variant
-    number_of_states_reporting_p1 = np.count_nonzero(variant_p1_df['Cases'])
-
-    # Filter df of variant B.1.351 
-    variant_b1351_df = cdc_variants_data[cdc_variants_data['filter']== 'Variant B.1.351']
-
-    # Count states reporting B.1.351 Variant
-    number_of_states_reporting_b1351 = np.count_nonzero(variant_b1351_df['Cases'])
-
-    # Create summary dataframe
-    cdc_variants_data_grouped_by_filter["Number of Jurisdictions Reporting"] = [number_of_states_reporting_b117,number_of_states_reporting_b1351,number_of_states_reporting_p1]
-    cdc_variants_data_grouped_by_filter.columns = ["Variant","Reported Cases in US","Number of Jurisdictions Reporting"]
-    return cdc_variants_data_grouped_by_filter
+    return variant_summary_df 
 
 # function to get the current date
 def get_pst_time():
