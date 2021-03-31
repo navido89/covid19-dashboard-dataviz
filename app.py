@@ -403,7 +403,7 @@ def plot4a():
     cont_totals = cont_totals.reset_index()
     
     # Here we import the population data from WHO.
-    df_who_pop = pd.read_csv("https://apps.who.int/gho/athena/data/xmart.csv?target=GHO/WHS9_86,WHS9_88,WHS9_89,WHS9_92,WHS9_96,WHS9_97,WHS9_90&profile=crosstable&filter=COUNTRY:-;REGION:*&x-sideaxis=REGION&x-topaxis=GHO;YEAR")
+    df_who_pop = pd.read_csv("WHO_Population.csv")
     
     # We grab the 3 columns in interest.
     df_who_pop = df_who_pop[["Unnamed: 0","Population (in thousands) total","Annual population growth rate (%)"]]
