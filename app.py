@@ -970,7 +970,7 @@ def plot11():
 @st.cache(suppress_st_warning=True,ttl=60*60*24)
 def plot12():
     # Pull in the data from the cdc
-    cdc_variants_data2 = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03282021_Web-UpdateCSV-TABLE.csv")
+    cdc_variants_data2 = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03302021_Web-Update.csv")
     
     # Check for states to remove. We need 50 states
     cdc_variants_data2_state_lst = cdc_variants_data2.State.values
@@ -1104,7 +1104,7 @@ def plot12():
 @st.cache(suppress_st_warning=True,ttl=60*60*24)
 def vairant_summary():
     # Pull in the data from the cdc 
-    cdc_variants_data = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03282021_Web-UpdateCSV-TABLE.csv")
+    cdc_variants_data = pd.read_csv("https://www.cdc.gov/coronavirus/2019-ncov/downloads/transmission/03302021_Web-Update.csv")
     
     # Let's create a table:
     reported_cases_in_us = cdc_variants_data.sum(axis=0)
