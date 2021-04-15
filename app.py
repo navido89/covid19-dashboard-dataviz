@@ -1269,7 +1269,7 @@ def main():
 
             # Add Variant Table
             st.subheader("US COVID-19 Cases Caused by Variants")
-            st.markdown("*Numbers will be updated on Sunday, Tuesday, and Thursday.*")
+            st.markdown("*According to the CDC, the data will no longer be updated. **Last update April 09, 2021**. Current data showing the prevalence of variants in the United States is available in the [COVID-19 Data Tracker.](https://covid.cdc.gov/covid-data-tracker/#variant-proportions)*")
             st.markdown("* B.1.1.7 = UK Variant")
             st.markdown("* B.1.351 = South Africa Variant")
             st.markdown("* P.1 = Brazil Variant")
