@@ -5,7 +5,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/navido89/covid19-dashboard-dataviz)
 
 # COVID-19 Dashboard - Web App
-**Project Status: Completed**
+**Project Status: Currently Actively Not Maintained**
 <br>
 <a href="https://share.streamlit.io/navido89/covid19-dashboard-dataviz/app.py" target="_blank">Web App</a> 
 <br>
